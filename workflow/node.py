@@ -19,4 +19,5 @@ class Node(object):
     def run_node(self):
         script_path = os.path.realpath(__file__)
         os.mkdir(self.path)
-        os.popen("cp %s/%s %s" % (script_path,self.name, self.config))
+        print "test"
+        os.popen("cp %s/%s.config %s" % (script_path,self.name, self.config))
