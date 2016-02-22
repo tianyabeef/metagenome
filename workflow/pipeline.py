@@ -30,7 +30,7 @@ if __name__ == '__main__':
     config.read("script_path/%s" % "../config/step.config")
     step_names = config.get("steps","name").rstrip().split(",")
     for name in step_names:
-        step1 = node.Node("00_rawData",configPath="work_dir/%s" % "00_raw_data")
+        step1 = node.Node("00_rawData",path =work_dir, config="work_dir/%s" % "00_raw_data.config")
         step1.run_node()
 
 

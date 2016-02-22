@@ -8,9 +8,10 @@ __version__ = "1.0.0-dev"
 import os
 
 class Node(object):
-    def __init__(self,name,configPath,commads=None):
+    def __init__(self,name,path,config,commads=None):
         self.name = name
-        self.configPath = configPath
+        self.path = path
+        self.config = config
         if commads is not None:
             self.commands = commads
         else:
@@ -18,4 +19,4 @@ class Node(object):
     def run_node(self):
         script_path = os.path.realpath(__file__)
         os.mkdir(self.path)
-        os.popen("cp %s/%s %s" % (script_path,self.name, self.configPath))
+        os.popen("cp %s/%s %s" % (script_path,self.name, self.config))
