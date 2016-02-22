@@ -6,15 +6,16 @@ __version__ = "1.0.0-dev"
 
 
 import os
+
 class Node(object):
-    def __init__(self,name,config,path,commads=None):
+    def __init__(self,name,configPath,commads=None):
         self.name = name
-        self.config = config
-        self.path = path
+        self.configPath = configPath
         if commads is not None:
             self.commands = commads
         else:
             self.commands = []
-def run_node(node):
-    os.mkdir(node.path)
-    os.popen("cp %s %s/%s" % (node.config.path , node.path , node.config.name))
+    def run_node(self):
+        script_path = os.path.realpath(__file__)
+        os.mkdir(self.path)
+        os.popen("cp %s/%s %s" % (script_path,self.name, self.configPath))

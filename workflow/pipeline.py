@@ -8,7 +8,7 @@ from ConfigParser import ConfigParser
 import sys
 import node
 import argparse
-
+import os
 def read_params(args):
     parsers = argparse.ArgumentParser(description='''The initial run script of metagene ''')
     parsers.add_argument('--config', dest='config_path', metavar='FILE', type=str, required=True,
@@ -20,5 +20,18 @@ def read_params(args):
 if __name__ == '__main__':
     args = sys.argv
     params = read_params(args)
-    config = params.config
-    print config
+    config_path = params.config_path
+    config = ConfigParser()
+    config.read(config_path)
+    work_dir = config.get("param","work_dir")
+    sample_name = config.get("param","sample_name")
+    script_path = os.path.realpath(__file__)
+    print script_path
+    config.read("script_path/%s" % "../config/step.config")
+    step_names = config.get("steps","name").rstrip().split(",")
+    for name in step_names:
+        step1 = node.Node("00_rawData",configPath="work_dir/%s" % "00_raw_data")
+        step1.run_node()
+
+
+
