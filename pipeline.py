@@ -6,7 +6,7 @@ __version__ = "1.0.0-dev"
 
 from ConfigParser import ConfigParser
 import sys
-from workflow import node
+from workflow.node import Node
 from workflow.util.globals import const
 import argparse
 import os
@@ -20,6 +20,8 @@ def read_params(args):
 
 
 if __name__ == '__main__':
+    config_default_dir = const.config_default_dir
+
     args = sys.argv
     params = read_params(args)
     config_path = params.config_path
@@ -29,14 +31,12 @@ if __name__ == '__main__':
     sample_name = config.get("param","sample_name")
     script_dir = os.path.dirname(__file__)
     config_step = ConfigParser()
-    config_default_dir = const.config_default_dir
+
     config_step.read("%s/%s" % (config_default_dir,"step.config"))
     step_names = config_step.get("steps","name").rstrip().split(",")
     for name in step_names:
-        print name
         step_dir = "%s/%s/" % (work_dir,name)
-        step1 = node.Node(name, path = step_dir)
+        step1 = Node(name, path=step_dir)
         step1.run_node()
-        print "end"
 
 
