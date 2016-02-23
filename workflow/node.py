@@ -8,8 +8,10 @@ __version__ = "1.0.0-dev"
 import os
 import sys
 this_script_path = os.path.dirname(__file__)
-sys.path.insert(1, this_script_path + '/../')
-import const
+sys.path.insert(1, this_script_path + '/')
+from workflow.util.globals import _const
+
+
 
 class Node(object):
     def __init__(self,name,path,config=None,commads=None):
@@ -27,7 +29,7 @@ class Node(object):
         script_dir = os.path.dirname(__file__)
         if not os.path.exists(self.path):
             os.mkdir(self.path)
-        config_default_dir = const.config_default_dir
+        config_default_dir = _const.config_default_dir
         print config_default_dir
         config_default_file = "%s/%s.config" % (config_default_dir,self.name)
         print config_default_file

@@ -3,6 +3,10 @@
 __author__ = "huangy"
 __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
+
+
+
+
 import sys
 class _const(object):
     class ConstError(TypeError): pass
@@ -18,5 +22,6 @@ class _const(object):
         raise NameError, name
 
 sys.modules[__name__] = _const()
-_const.script_dir = "/data_center_01/pipeline/huangy/metagenome"
-_const.config_default_dir = "%s/config/" % _const.script_dir
+
+
+
