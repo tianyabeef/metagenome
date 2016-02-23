@@ -7,6 +7,8 @@ __version__ = "1.0.0-dev"
 
 import os
 import sys
+this_script_path = os.path.dirname(__file__)
+sys.path.insert(1, this_script_path + '/../')
 import const
 
 class Node(object):
