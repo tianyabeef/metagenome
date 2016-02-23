@@ -26,9 +26,9 @@ if __name__ == '__main__':
     work_dir = config.get("param","work_dir")
     sample_name = config.get("param","sample_name")
     script_dir = os.path.dirname(__file__)
-    print script_dir
-    config.read("script_path/%s" % "../config/step.config")
-    step_names = config.get("steps","name").rstrip().split(",")
+    config_step = ConfigParser()
+    config_step.read("%s/%s" % (script_dir,"../config/step.config"))
+    step_names = config_step.get("steps","name").rstrip().split(",")
     for name in step_names:
         step1 = node.Node("00_rawData",path =work_dir, config="work_dir/%s" % "00_raw_data.config")
         step1.run_node()
