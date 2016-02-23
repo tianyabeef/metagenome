@@ -34,6 +34,6 @@ if __name__ == '__main__':
         step_dir = "%s/%s/" % (work_dir,name)
         step1 = node.Node(name,path = step_dir)
         step1.run_node()
-
+        print "end"
 
 
