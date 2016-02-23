@@ -6,6 +6,8 @@ __version__ = "1.0.0-dev"
 
 
 import os
+import sys
+import const
 
 class Node(object):
     def __init__(self,name,path,config=None,commads=None):
@@ -23,5 +25,11 @@ class Node(object):
         script_dir = os.path.dirname(__file__)
         if not os.path.exists(self.path):
             os.mkdir(self.path)
-        print "test"
-        os.popen("cp %s/../config/%s.config %s" % (script_dir,self.name, self.config))
+        config_default_dir = const.config_default_dir
+        print config_default_dir
+        config_default_file = "%s/%s.config" % (config_default_dir,self.name)
+        print config_default_file
+        if os.path.exists(config_default_file):
+            os.popen("cp %s/../config/%s.config %s" % (script_dir,self.name, self.config))
+        else:
+            sys.stderr.write("the %s step no add default config : %s" % (self.name,config_default_file))
