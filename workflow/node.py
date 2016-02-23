@@ -24,4 +24,4 @@ class Node(object):
         if not os.path.exists(self.path):
             os.mkdir(self.path)
         print "test"
-        os.popen("cp %s/%s.config %s" % (script_dir,self.name, self.config))
+        os.popen("cp %s/config/%s.config %s" % (script_dir,self.name, self.config))
