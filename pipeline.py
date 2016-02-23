@@ -6,9 +6,11 @@ __version__ = "1.0.0-dev"
 
 from ConfigParser import ConfigParser
 import sys
-import workflow.node
+from workflow import node
+from workflow.util.globals import const
 import argparse
 import os
+
 def read_params(args):
     parsers = argparse.ArgumentParser(description='''The initial run script of metagene ''')
     parsers.add_argument('--config', dest='config_path', metavar='FILE', type=str, required=True,
@@ -27,12 +29,13 @@ if __name__ == '__main__':
     sample_name = config.get("param","sample_name")
     script_dir = os.path.dirname(__file__)
     config_step = ConfigParser()
-    config_step.read("%s/%s" % (script_dir,"../config/step.config"))
+    config_default_dir = const.config_default_dir
+    config_step.read("%s/%s" % (config_default_dir,"step.config"))
     step_names = config_step.get("steps","name").rstrip().split(",")
     for name in step_names:
         print name
         step_dir = "%s/%s/" % (work_dir,name)
-        step1 = workflow.node.Node(name, path = step_dir)
+        step1 = node.Node(name, path = step_dir)
         step1.run_node()
         print "end"
 
