@@ -25,8 +25,8 @@ if __name__ == '__main__':
     config.read(config_path)
     work_dir = config.get("param","work_dir")
     sample_name = config.get("param","sample_name")
-    script_path = os.path.realpath(__file__)
-    print script_path
+    script_dir = os.path.dirname(__file__)
+    print script_dir
     config.read("script_path/%s" % "../config/step.config")
     step_names = config.get("steps","name").rstrip().split(",")
     for name in step_names:
