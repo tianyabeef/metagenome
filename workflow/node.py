@@ -31,4 +31,4 @@ class Node(object):
         if os.path.exists(config_default_file):
             os.popen("cp %s %s" % (config_default_file, self.config))
         else:
-            sys.stderr.write("the %s step no add default config : %s" % (self.name,config_default_file))
+            sys.stderr.write("the %s step no add default config : %s \n" % (os.path.splitext(self.name)[0],config_default_file))

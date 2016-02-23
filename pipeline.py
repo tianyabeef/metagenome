@@ -4,12 +4,14 @@ __author__ = "huangy"
 __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
 
-from ConfigParser import ConfigParser
-import sys
-from workflow.node import Node
-from workflow.util.globals import const
 import argparse
 import os
+import sys
+from ConfigParser import ConfigParser
+
+from workflow.node import Node
+from workflow.util.globals import const
+
 
 def read_params(args):
     parsers = argparse.ArgumentParser(description='''The initial run script of metagene ''')
@@ -29,7 +31,6 @@ if __name__ == '__main__':
     config.read(config_path)
     work_dir = config.get("param","work_dir")
     sample_name = config.get("param","sample_name")
-    script_dir = os.path.dirname(__file__)
     config_step = ConfigParser()
 
     config_step.read("%s/%s" % (config_default_dir,"step.config"))
