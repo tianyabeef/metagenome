@@ -6,7 +6,7 @@ __version__ = "1.0.0-dev"
 
 from ConfigParser import ConfigParser
 import sys
-import node
+import workflow.node
 import argparse
 import os
 def read_params(args):
@@ -32,7 +32,7 @@ if __name__ == '__main__':
     for name in step_names:
         print name
         step_dir = "%s/%s/" % (work_dir,name)
-        step1 = node.Node(name,path = step_dir)
+        step1 = workflow.node.Node(name, path = step_dir)
         step1.run_node()
         print "end"
 

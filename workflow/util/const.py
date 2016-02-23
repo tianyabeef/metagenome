@@ -3,12 +3,8 @@
 __author__ = "huangy"
 __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
-
-
-
-
 import sys
-class _const(object):
+class const(object):
     class ConstError(TypeError): pass
 
     def __setattr__(self, name, value):
@@ -21,7 +17,7 @@ class _const(object):
             raise self.ConstError, "Can't unbind const(%s)" % name
         raise NameError, name
 
-sys.modules[__name__] = _const()
+sys.modules[__name__] = const()
 
 
 
