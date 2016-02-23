@@ -21,6 +21,7 @@ class Node(object):
             self.commands = []
     def run_node(self):
         script_dir = os.path.dirname(__file__)
-        os.mkdir(self.path)
+        if not os.path.exists(self.path):
+            os.mkdir(self.path)
         print "test"
         os.popen("cp %s/%s.config %s" % (script_dir,self.name, self.config))
