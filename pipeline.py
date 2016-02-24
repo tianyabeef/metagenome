@@ -47,7 +47,7 @@ if __name__ == '__main__':
     config_step0.read(step0.config)
     rawlink = config_step0.get("script","01_rawlink")
     step0.command = "python %s -i %s -o %s" % (rawlink,sample_name,step0.path)
-    config_step0.write(step0.config)
+    config_step0.write(open(step0.config,"w"))
     step0.create_shell(config_step0)
 
 
