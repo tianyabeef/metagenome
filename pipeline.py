@@ -4,6 +4,10 @@ __author__ = "huangy"
 __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
 
+
+from matplotlib import pylab
+pylab.figure().add_subplot.legend
+pylab.figure().subplots_adjust
 import argparse
 import os
 import sys
