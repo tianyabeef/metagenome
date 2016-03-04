@@ -41,7 +41,7 @@ def rmPE(read1,read2,adaptor1,adaptor2,min_length):
     adaptor_read2_pos_2 = match_adaptor(read2,adaptor2[7:13])
     if not (adaptor_read1_pos_1 + adaptor_read1_pos_2 + adaptor_read2_pos_1 + adaptor_read2_pos_2):
         pass
-        #TODO clean reads
+        #TODO clean readsssss
         print "%s\t%s\t%s\t%s" % (adaptor_read1_pos_1,adaptor_read1_pos_2,adaptor_read2_pos_1,adaptor_read2_pos_2)
     elif(not ((adaptor_read1_pos_1 and adaptor_read1_pos_2) and (adaptor_read2_pos_1 and adaptor_read2_pos_2))):
         #TODO clean reads
