@@ -6,10 +6,30 @@ import re
 from Bio import SeqIO
 
 
+def read_params(args):
+    parser = argparse.ArgumentParser(description='plot alpha rare | v1.0 at 2015/09/28 by liangzb')
+    parser.add_argument('--out_prefix',dest='out_prefix',metavar="DIR",type=str,required=True,
+                        help="out file prefix")
+    parser.add_argument('-r1', '--read1', dest='read1', metavar='DIR', type=str, required=True,
+                        help="read1.fastq")
+    parser.add_argument('-r2', '--read2', dest='read2', metavar='DIR', type=str, required=True,
+                        help="read2.fastq")
+    parser.add_argument('-a1', '--read1Adaptor', dest='read1Adaptor', metavar='string', type=str, required=True,
+                        help="AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC")
+    parser.add_argument('-a2', '--read2Adaptor', dest='read2Adaptor', metavar='string', type=str, required=True,
+                        help="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT")
+    parser.add_argument('--type',dest="type",metavar='string',type=str,required=True,
+                        help="PE or SE")
+    parser.add_argument('--mistaken_ratio',dest="mistaken_ratio",metavar="int",type=float,default=0.2,
+                        help="mistaken_ratio defult[0.2]")
+    parser.add_argument('--out_type',dest="out_type",metavar="STRING",type=int,default=4,
+                        help="2 : two file out ;  4 : four file out.")
+    args = parser.parse_args()
+    params = vars(args)
+    return params
 
 
-mistaken_ratio = 0.2
-keep_reads = True
+
 
 
 def match_adaptor(seq,seed):
@@ -37,7 +57,7 @@ def situation_1(read1,read2,adaptor1,adaptor2):#adaptor1 30个碱基匹配到rea
         pos2 = seq2.find(adaptor2)
     if pos2 > 0:
         return True,read1[:pos2],read2[:pos2]
-    return False,[],[]
+    return False,read1,read2
 def situation_2(read1,read2,adaptor1,adaptor2): #四次匹配中只有0、1、2次匹配上的
     seq1 = read1.seq
     seq2 = read2.seq
@@ -58,25 +78,25 @@ def situation_2(read1,read2,adaptor1,adaptor2): #四次匹配中只有0、1、2�
     if true_num == 0 or true_num==1 :
         return True,read1,read2 #clean reads
     else:
-        return False,[],[]
-def rmPE(read1,read2,adaptor1,adaptor2,min_length):
+        return False,read1[:adaptor_read1_pos_1],read2[:adaptor_read2_pos_1]
+def rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio):
     result = situation_1(read1,read2,adaptor1,adaptor2)
     if result[0]:
         return False,result[1],result[2] #del seq1 and seq2
 
     result = situation_2(read1,read2,adaptor1,adaptor2)
     if result[0]:
-        return True,result[1],result[2]
+        return True,result[1],result[2]  #clean seq1 and seq2
 
-    res_1 = rmSE(read1,adaptor1,min_length,mistaken_ratio)
-    res_2 = rmSE(read2,adaptor2,min_length,mistaken_ratio)
+    res_1 = rmSE(read1,adaptor1,mistaken_ratio)
+    res_2 = rmSE(read2,adaptor2,mistaken_ratio)
     if res_1 and res_2:
         return True,res_1,res_2
     else:
         return False,read1,read2 #有比较多的错配
 
 
-def rmSE(read,adaptor,min_length,mistaken_ratio):
+def rmSE(read,adaptor,mistaken_ratio):
     seq = read.seq
     seed_len = 6
     adaptor_len = len(adaptor)
@@ -117,46 +137,49 @@ def rmSE(read,adaptor,min_length,mistaken_ratio):
     return read[:_b+1]
 
 
-def rmAdaptor(argv):
-    argv.pop(0)
-    type = argv.pop(0)
+def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio):
     if type=='PE':
-        read1_file,read2_file,adaptor1,adaptor2,out_prefix,min_length = argv
         read2_records = SeqIO.parse(open(read2_file),'fastq')
         read1_out = open( '%s.1.fq'%out_prefix,'w' )
         read2_out = open( '%s.2.fq'%out_prefix,'w' )
-        read1_rm_out = open( '%s.1_rm.fq'%out_prefix,'w' )
-        read2_rm_out = open( '%s.2_rm.fq'%out_prefix,'w' )
-        for read1 in SeqIO.parse(open(read1_file),'fastq'):
-            read2 = read2_records.next()
-            rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,min_length)
-            if rmPE_res[0]:
+        if out_type==4:
+            read1_rm_out = open( '%s.1_rm.fq'%out_prefix,'w' )
+            read2_rm_out = open( '%s.2_rm.fq'%out_prefix,'w' )
+            for read1 in SeqIO.parse(open(read1_file),'fastq'):
+                read2 = read2_records.next()
+                rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio)
+                if rmPE_res[0]:
+                    read1_out.write(rmPE_res[1].format('fastq'))
+                    read2_out.write(rmPE_res[2].format('fastq'))
+                else:
+                    read1_rm_out.write(rmPE_res[1].format('fastq'))
+                    read2_rm_out.write(rmPE_res[2].format('fastq'))
+            read1_rm_out.close()
+            read2_rm_out.close()
+        else:
+            for read1 in SeqIO.parse(open(read1_file),'fastq'):
+                read2 = read2_records.next()
+                rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio)
                 read1_out.write(rmPE_res[1].format('fastq'))
                 read2_out.write(rmPE_res[2].format('fastq'))
-            else:
-                read1_rm_out.write(rmPE_res[1].format('fastq'))
-                read2_rm_out.write(rmPE_res[2].format('fastq'))
         read1_out.close()
         read2_out.close()
-        read1_rm_out.close()
-        read2_rm_out.close()
-    elif type=='SE':
-        reads_file,adaptor1,adaptor2,out_prefix,min_length = argv
-        reads_out = open( '%s.single.fq'%out_prefix,'w' )
-        for reads in SeqIO.parse(open(reads_file),'fastq'):
-            rmSE_res = False
-            if re.search('[\s\/](\d)',reads.id).group(1) == '1':
-                rmSE_res = rmSE(reads,adaptor1,min_length)
-            elif re.search('[\s\/](\d)',reads.id).group(1) == '2':
-                rmSE_res = rmSE(reads,adaptor2,min_length)
-            if rmSE_res:
-                reads_out.write(rmSE_res.format('fastq'))
-        reads_out.close()
+
+
+
 
 
 
 
 if __name__ == '__main__':
-    sys.argv = ['workflow\\script\\01.rmAdaptor.py', 'PE', 'D:\\Workspaces\\metagenome\\test.read.1.fq', 'D:\\Workspaces\\metagenome\\test.read.2.fq', 'AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC', 'AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT', 'D:\\Workspaces\\metagenome\\test', '150']
-    rmAdaptor(sys.argv)
+    params = read_params(sys.argv)
+    read1_file = params["read1"]
+    read2_file = params["read2"]
+    adaptor1 = params["read1Adaptor"]
+    adaptor2 = params["read2Adaptor"]
+    type = params["type"]
+    out_prefix = params["out_prefix"]
+    mistaken_ratio = params["mistaken_ratio"]
+    out_type = params["out_type"]
+    rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio)
 
