@@ -57,7 +57,7 @@ def situation_1(read1,read2,adaptor1,adaptor2):#adaptor1 30个碱基匹配到rea
         pos2 = seq2.find(adaptor2)
     if pos2 > 0:
         return True,read1[:pos2],read2[:pos2]
-    return False,read1,read2
+    return False,[],[]
 def situation_2(read1,read2,adaptor1,adaptor2): #四次匹配中只有0、1、2次匹配上的
     seq1 = read1.seq
     seq2 = read2.seq
@@ -66,7 +66,6 @@ def situation_2(read1,read2,adaptor1,adaptor2): #四次匹配中只有0、1、2�
     adaptor_read1_pos_2 = match_adaptor(seq1,adaptor1[7:13])
     adaptor_read2_pos_1 = match_adaptor(seq2,adaptor2[0:7])
     adaptor_read2_pos_2 = match_adaptor(seq2,adaptor2[7:13])
-    print "%s\t%s\t%s\t%s\n" % (adaptor_read1_pos_1,adaptor_read1_pos_2,adaptor_read2_pos_1,adaptor_read2_pos_2)
     if adaptor_read1_pos_1:
         true_num += 1
     if adaptor_read1_pos_2:
@@ -78,7 +77,7 @@ def situation_2(read1,read2,adaptor1,adaptor2): #四次匹配中只有0、1、2�
     if true_num == 0 or true_num==1 :
         return True,read1,read2 #clean reads
     else:
-        return False,read1[:adaptor_read1_pos_1],read2[:adaptor_read2_pos_1]
+        return False,[],[]
 def rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio):
     result = situation_1(read1,read2,adaptor1,adaptor2)
     if result[0]:
@@ -90,10 +89,10 @@ def rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio):
 
     res_1 = rmSE(read1,adaptor1,mistaken_ratio)
     res_2 = rmSE(read2,adaptor2,mistaken_ratio)
-    if res_1 and res_2:
-        return True,res_1,res_2
+    if res_1[0] and res_2[0]:
+        return True,res_1[1],res_2[1]
     else:
-        return False,read1,read2 #有比较多的错配
+        return False,read1[1],read2[1] #有比较多的错配
 
 
 def rmSE(read,adaptor,mistaken_ratio):
@@ -102,7 +101,6 @@ def rmSE(read,adaptor,mistaken_ratio):
     adaptor_len = len(adaptor)
 
     seq_len = len(seq)
-    _b = seq_len
     for i in [0,6,12]:
         seed = adaptor[i:i+seed_len]
         pos = 0
@@ -130,11 +128,11 @@ def rmSE(read,adaptor,mistaken_ratio):
                             break
                         _e += 1
                     else:
-                        return False
+                        return False,read[:_b+1]
                 pos = find_pos + 1
             else:
                 break
-    return read[:_b+1]
+    return True,read
 
 
 def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio):
@@ -181,5 +179,14 @@ if __name__ == '__main__':
     out_prefix = params["out_prefix"]
     mistaken_ratio = params["mistaken_ratio"]
     out_type = params["out_type"]
+    # type ="PE"
+    # read1_file="D:\\Workspaces\\metagenome\\read1.fq"
+    # read2_file="D:\\Workspaces\\metagenome\\read2.fq"
+    # adaptor1="AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
+    # adaptor2="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT"
+    # out_prefix = "D:\\Workspaces\\metagenome\\test2_"
+    # out_type = 4
+    # mistaken_ratio= 0.2
+
     rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio)
 
