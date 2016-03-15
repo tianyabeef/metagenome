@@ -4,7 +4,7 @@ import argparse
 import sys
 import re
 from Bio import SeqIO
-
+import os
 
 def read_params(args):
     parser = argparse.ArgumentParser(description='plot alpha rare | v1.0 at 2015/09/28 by liangzb')
@@ -136,6 +136,9 @@ def rmSE(read,adaptor,mistaken_ratio):
 
 
 def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio):
+    total_read_num = 0
+    clean_read_num = 0
+    adaptor_read_num = 0
     if type=='PE':
         read2_records = SeqIO.parse(open(read2_file),'fastq')
         read1_out = open( '%s.1.fq'%out_prefix,'w' )
@@ -144,14 +147,17 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
             read1_rm_out = open( '%s.1_rm.fq'%out_prefix,'w' )
             read2_rm_out = open( '%s.2_rm.fq'%out_prefix,'w' )
             for read1 in SeqIO.parse(open(read1_file),'fastq'):
+                total_read_num += 2
                 read2 = read2_records.next()
                 rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio)
                 if rmPE_res[0]:
-                    read1_out.write(rmPE_res[1].format('fastq'))
-                    read2_out.write(rmPE_res[2].format('fastq'))
+                    clean_read_num += 2
+                    read1_out.write(rmPE_res[1].format('fastq'))#clean read
+                    read2_out.write(rmPE_res[2].format('fastq'))#clean read
                 else:
-                    read1_rm_out.write(rmPE_res[1].format('fastq'))
-                    read2_rm_out.write(rmPE_res[2].format('fastq'))
+                    adaptor_read_num += 2
+                    read1_rm_out.write(rmPE_res[1].format('fastq'))#adaptor read
+                    read2_rm_out.write(rmPE_res[2].format('fastq'))#adaptor read
             read1_rm_out.close()
             read2_rm_out.close()
         else:
@@ -162,6 +168,7 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
                 read2_out.write(rmPE_res[2].format('fastq'))
         read1_out.close()
         read2_out.close()
+        return total_read_num,clean_read_num,adaptor_read_num
 
 
 
@@ -188,5 +195,7 @@ if __name__ == '__main__':
     # out_type = 4
     # mistaken_ratio= 0.2
 
-    rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio)
-
+    total_read_num,clean_read_num,adaptor_read_num = rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio)
+    with open("%s_adaptor_statistical.tsv" % out_prefix,mode="w") as fqout:
+        fqout.write("sampleName\ttotal_reads\tremain_reads\tadaptor_reads\n")
+        fqout.write("%s\t%s\t%s\t%s\n" % (os.path.basename(out_prefix),total_read_num,clean_read_num,adaptor_read_num))
