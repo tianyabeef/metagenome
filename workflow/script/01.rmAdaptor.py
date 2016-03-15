@@ -162,10 +162,15 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
             read2_rm_out.close()
         else:
             for read1 in SeqIO.parse(open(read1_file),'fastq'):
+                total_read_num += 2
                 read2 = read2_records.next()
                 rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio)
-                read1_out.write(rmPE_res[1].format('fastq'))
-                read2_out.write(rmPE_res[2].format('fastq'))
+                if rmPE_res[0]:
+                    clean_read_num += 2
+                    read1_out.write(rmPE_res[1].format('fastq'))#clean read
+                    read2_out.write(rmPE_res[2].format('fastq'))#clean read
+                else:
+                    adaptor_read_num += 2
         read1_out.close()
         read2_out.close()
         return total_read_num,clean_read_num,adaptor_read_num
