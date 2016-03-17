@@ -92,7 +92,7 @@ def rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio):
     if res_1[0] and res_2[0]:
         return True,res_1[1],res_2[1]
     else:
-        return False,read1[1],read2[1] #有比较多的错配
+        return False,res_1[1],res_2[1]
 
 
 def rmSE(read,adaptor,mistaken_ratio):
@@ -184,23 +184,23 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
 
 
 if __name__ == '__main__':
-    params = read_params(sys.argv)
-    read1_file = params["read1"]
-    read2_file = params["read2"]
-    adaptor1 = params["read1Adaptor"]
-    adaptor2 = params["read2Adaptor"]
-    type = params["type"]
-    out_prefix = params["out_prefix"]
-    mistaken_ratio = params["mistaken_ratio"]
-    out_type = params["out_type"]
-    # type ="PE"
-    # read1_file="D:\\Workspaces\\metagenome\\read1.fq"
-    # read2_file="D:\\Workspaces\\metagenome\\read2.fq"
-    # adaptor1="AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
-    # adaptor2="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT"
-    # out_prefix = "D:\\Workspaces\\metagenome\\test2_"
-    # out_type = 4
-    # mistaken_ratio= 0.2
+    # params = read_params(sys.argv)
+    # read1_file = params["read1"]
+    # read2_file = params["read2"]
+    # adaptor1 = params["read1Adaptor"]
+    # adaptor2 = params["read2Adaptor"]
+    # type = params["type"]
+    # out_prefix = params["out_prefix"]
+    # mistaken_ratio = params["mistaken_ratio"]
+    # out_type = params["out_type"]
+    type ="PE"
+    read1_file="D:\\Workspaces\\metagenome\\test.1.fq"
+    read2_file="D:\\Workspaces\\metagenome\\test.2.fq"
+    adaptor1="AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC"
+    adaptor2="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT"
+    out_prefix = "D:\\Workspaces\\metagenome\\test2_"
+    out_type = 2
+    mistaken_ratio= 0.2
 
     total_read_num,clean_read_num,adaptor_read_num = rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio)
     with open("%s_adaptor_statistical.tsv" % out_prefix,mode="w") as fqout:
