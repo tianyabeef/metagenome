@@ -171,6 +171,8 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
                     read2_out.write(rmPE_res[2].format('fastq'))#clean read
                 else:
                     adaptor_read_num += 2
+                    read1_out.write(rmPE_res[1].format('fastq'))#adaptor read
+                    read2_out.write(rmPE_res[2].format('fastq'))#adaptor read
         read1_out.close()
         read2_out.close()
         return total_read_num,clean_read_num,adaptor_read_num
