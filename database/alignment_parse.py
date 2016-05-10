@@ -122,6 +122,8 @@ if __name__ == '__main__':
         dfs.append(df)
     result = pd.concat(dfs, axis=1)
     result.to_csv(outputfile,seq="\t",header=True)
+    end = time.time()
+    sys.stdout.write(" concat step run time: %s\n" % (end-start))
     # with open(outputfile, "w") as fqout:
     #     for key, value in inf.items():
     #         fqout.write(">%s\n%s\n" % (key, value))
