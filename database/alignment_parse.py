@@ -42,9 +42,9 @@ def read_pe(pe):
                 query = tabs[0]
                 refer = tabs[7]
                 flag = tabs[4]
-                outstring = "\n%s\tP\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
+                outstring = "%s\tP\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
                 if inf.has_key(query):
-                    inf[query] = "%s\n%s" % (outstring, inf[query])
+                    inf[query] = "%s,%s" % (outstring, inf[query])
                 else:
                     inf[query] = outstring
         f1 = file("%s.pkl" % key, 'wb')
@@ -65,9 +65,9 @@ def read_se(se):
                 query = tabs[0]
                 refer = tabs[7]
                 flag = tabs[4]
-                outstring = "\n%s\tS\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
+                outstring = "%s\tS\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
                 if inf.has_key(query):
-                    inf[query] = "%s\n%s" % (outstring, inf[query])
+                    inf[query] = "%s,%s" % (outstring, inf[query])
                 else:
                     inf[query] = outstring
         f1 = file("%s.pkl" % key, 'wb')
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     end = time.time()
     sys.stdout.write("load data run time: %s\n" % (end-start))
     start = time.time()
-    df_first.to_csv(outputfile,sep="\t",header=True)
+    df_first.to_csv(outputfile,sep=",",header=True)
     end = time.time()
     sys.stdout.write("concat step run time: %s\n" % (end-start))
     # with open(outputfile, "w") as fqout:
