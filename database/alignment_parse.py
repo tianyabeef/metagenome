@@ -115,7 +115,7 @@ if __name__ == '__main__':
         sys.stdout.write("%s\n" % key)
         names = re.split('\.|-', key)
         stringname = names[-2]
-        file_handle = open('key', 'rb')
+        file_handle = open("%s.pkl" % key, 'rb')
         d = pickle.load(file_handle)
         file_handle.close()
         df = pd.DataFrame(d,index=[stringname]).T
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     result = pd.concat(dfs, axis=1)
     result.to_csv(outputfile,seq="\t",header=True)
     end = time.time()
-    sys.stdout.write(" concat step run time: %s\n" % (end-start))
+    sys.stdout.write("concat step run time: %s\n" % (end-start))
     # with open(outputfile, "w") as fqout:
     #     for key, value in inf.items():
     #         fqout.write(">%s\n%s\n" % (key, value))
