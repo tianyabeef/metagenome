@@ -105,21 +105,20 @@ if __name__ == '__main__':
         sys.stdout.write("start work SE\n")
         read_se(se)
     end = time.time()
-    sys.stdout.write(" run time: %s\n" % (end-start))
+    sys.stdout.write("run time: %s\n" % (end-start))
 
     start = time.time()
     inf = {}
     dfs = []
-    for key in [pe,se]:
-        if not key:
-            sys.stdout.write("%s\n" % key)
-            names = re.split('\.|-', key)
-            stringname = names[-2]
-            file_handle = open('key', 'rb')
-            d = pickle.load(file_handle)
-            file_handle.close()
-            df = pd.DataFrame(d,index=[stringname]).T
-            dfs.append(df)
+    for key in pe.extend(se):
+        sys.stdout.write("%s\n" % key)
+        names = re.split('\.|-', key)
+        stringname = names[-2]
+        file_handle = open('key', 'rb')
+        d = pickle.load(file_handle)
+        file_handle.close()
+        df = pd.DataFrame(d,index=[stringname]).T
+        dfs.append(df)
     result = pd.concat(dfs, axis=1)
     result.to_csv(outputfile,seq="\t",header=True)
     end = time.time()
