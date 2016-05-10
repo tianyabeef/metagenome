@@ -100,6 +100,8 @@ if __name__ == '__main__':
                 else:
                     se.append(tabs[1])
     start = time.time()
+    pkl_files_pe = []
+    pkl_files_se = []
     if len(pe)>0:
         sys.stdout.write("start work PE\n")
         pkl_files_pe = read_pe(pe)
@@ -113,13 +115,14 @@ if __name__ == '__main__':
     inf = {}
     dfs = []
     for key in [pkl_files_pe,pkl_files_se]:
-        names = re.split('\.|-', key)
-        stringname = names[-3]
-        file_handle = open('key', 'rb')
-        d = pickle.load(file_handle)
-        file_handle.close()
-        df = pd.DataFrame(d,index=[stringname]).T
-        dfs.append(df)
+        if not key:
+            names = re.split('\.|-', key)
+            stringname = names[-3]
+            file_handle = open('key', 'rb')
+            d = pickle.load(file_handle)
+            file_handle.close()
+            df = pd.DataFrame(d,index=[stringname]).T
+            dfs.append(df)
     result = pd.concat(dfs, axis=1)
     result.to_csv(outputfile,seq="\t",header=True)
     end = time.time()
