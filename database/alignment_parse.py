@@ -11,6 +11,7 @@ except ImportError:
 import argparse
 import sys
 import re
+import time
 
 
 def read_params(args):
@@ -44,7 +45,7 @@ def read_pe(pe):
                 else:
                     inf[query] = outstring
         f1 = file("%s.pkl" % key, 'wb')
-        pickle.dump(inf,f1,protocol=1)
+        pickle.dump(inf,f1,protocol=2)
         f1.close()
 
 
@@ -66,7 +67,7 @@ def read_se(se):
                 else:
                     inf[query] = outstring
         f1 = file("%s.pkl" % key, 'wb')
-        pickle.dump(inf,f1,protocol=1)
+        pickle.dump(inf,f1,protocol=2)
         f1.close()
 
 
@@ -91,13 +92,15 @@ if __name__ == '__main__':
                     pe.append(tabs[1])
                 else:
                     se.append(tabs[1])
-    if not pe:
-        sys.stdout.write("start word PE\n")
+    start = time.time()
+    if len(pe)>0:
+        sys.stdout.write("start work PE\n")
         read_pe(pe)
-    if not se:
-        sys.stdout.write("start word SE\n")
+    if len(se)>0:
+        sys.stdout.write("start work SE\n")
         inf = read_se(se)
-
+    end = time.time()
+    sys.stdout.write(" run time: %s\n" % (end-start))
     # with open(outputfile, "w") as fqout:
     #     for key, value in inf.items():
     #         fqout.write(">%s\n%s\n" % (key, value))
