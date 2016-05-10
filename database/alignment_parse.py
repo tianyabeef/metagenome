@@ -49,8 +49,6 @@ def read_pe(pe):
         f1 = file("%s.pkl" % key, 'wb')
         pickle.dump(inf,f1,protocol=2)
         f1.close()
-        pkl_files.append(f1)
-    return pkl_files
 
 
 def read_se(se):
@@ -74,8 +72,7 @@ def read_se(se):
         f1 = file("%s.pkl" % key, 'wb')
         pickle.dump(inf,f1,protocol=2)
         f1.close()
-        pkl_files.append(f1)
-    return pkl_files
+
 
 
 if __name__ == '__main__':
@@ -100,24 +97,24 @@ if __name__ == '__main__':
                 else:
                     se.append(tabs[1])
     start = time.time()
-    pkl_files_pe = []
-    pkl_files_se = []
+
     if len(pe)>0:
         sys.stdout.write("start work PE\n")
-        pkl_files_pe = read_pe(pe)
+        read_pe(pe)
     if len(se)>0:
         sys.stdout.write("start work SE\n")
-        pkl_files_se = read_se(se)
+        read_se(se)
     end = time.time()
     sys.stdout.write(" run time: %s\n" % (end-start))
 
     start = time.time()
     inf = {}
     dfs = []
-    for key in [pkl_files_pe,pkl_files_se]:
+    for key in [pe,se]:
         if not key:
+            sys.stdout.write("%s\n" % key)
             names = re.split('\.|-', key)
-            stringname = names[-3]
+            stringname = names[-2]
             file_handle = open('key', 'rb')
             d = pickle.load(file_handle)
             file_handle.close()
