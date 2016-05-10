@@ -120,6 +120,9 @@ if __name__ == '__main__':
         file_handle.close()
         df = pd.DataFrame(d,index=[stringname]).T
         dfs.append(df)
+    end = time.time()
+    sys.stdout.write("load data run time: %s\n" % (end-start))
+    start = time.time()
     result = pd.concat(dfs, axis=1)
     result.to_csv(outputfile,sep="\t",header=True)
     end = time.time()
