@@ -41,7 +41,7 @@ def read_pe(pe):
                 query = tabs[0]
                 refer = tabs[7]
                 flag = tabs[4]
-                outstring = "%s\tP\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
+                outstring = "\n%s\tP\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
                 if inf.has_key(query):
                     inf[query] = "%s\n%s" % (outstring, inf[query])
                 else:
@@ -64,7 +64,7 @@ def read_se(se):
                 query = tabs[0]
                 refer = tabs[7]
                 flag = tabs[4]
-                outstring = "%s\tS\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
+                outstring = "\n%s\tS\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
                 if inf.has_key(query):
                     inf[query] = "%s\n%s" % (outstring, inf[query])
                 else:
@@ -121,7 +121,7 @@ if __name__ == '__main__':
         df = pd.DataFrame(d,index=[stringname]).T
         dfs.append(df)
     result = pd.concat(dfs, axis=1)
-    result.to_csv(outputfile,seq="\t",header=True)
+    result.to_csv(outputfile,sep="\t",header=True)
     end = time.time()
     sys.stdout.write("concat step run time: %s\n" % (end-start))
     # with open(outputfile, "w") as fqout:
