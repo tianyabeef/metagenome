@@ -12,6 +12,7 @@ import argparse
 import sys
 import re
 import time
+import pandas as pd
 
 
 def read_params(args):
@@ -28,6 +29,7 @@ def read_params(args):
 
 
 def read_pe(pe):
+    pkl_files = []
     for key in pe:
         inf = {}
         with open(key, "r") as fq:
@@ -47,9 +49,12 @@ def read_pe(pe):
         f1 = file("%s.pkl" % key, 'wb')
         pickle.dump(inf,f1,protocol=2)
         f1.close()
+        pkl_files.append(f1)
+    return pkl_files
 
 
 def read_se(se):
+    pkl_files = []
     for key in se:
         inf = {}
         with open(key, "r") as fq:
@@ -69,6 +74,8 @@ def read_se(se):
         f1 = file("%s.pkl" % key, 'wb')
         pickle.dump(inf,f1,protocol=2)
         f1.close()
+        pkl_files.append(f1)
+    return pkl_files
 
 
 if __name__ == '__main__':
@@ -95,12 +102,26 @@ if __name__ == '__main__':
     start = time.time()
     if len(pe)>0:
         sys.stdout.write("start work PE\n")
-        read_pe(pe)
+        pkl_files_pe = read_pe(pe)
     if len(se)>0:
         sys.stdout.write("start work SE\n")
-        inf = read_se(se)
+        pkl_files_se = read_se(se)
     end = time.time()
     sys.stdout.write(" run time: %s\n" % (end-start))
+
+    start = time.time()
+    inf = {}
+    dfs = []
+    for key in [pkl_files_pe,pkl_files_se]:
+        names = re.split('\.|-', key)
+        stringname = names[-3]
+        file_handle = open('key', 'rb')
+        d = pickle.load(file_handle)
+        file_handle.close()
+        df = pd.DataFrame(d,index=[stringname]).T
+        dfs.append(df)
+    result = pd.concat(dfs, axis=1)
+    result.to_csv(outputfile,seq="\t",header=True)
     # with open(outputfile, "w") as fqout:
     #     for key, value in inf.items():
     #         fqout.write(">%s\n%s\n" % (key, value))
