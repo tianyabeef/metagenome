@@ -110,7 +110,8 @@ if __name__ == '__main__':
     start = time.time()
     inf = {}
     dfs = []
-    for key in pe.extend(se):
+    pe.extend(se)
+    for key in pe:
         sys.stdout.write("%s\n" % key)
         names = re.split('\.|-', key)
         stringname = names[-2]
