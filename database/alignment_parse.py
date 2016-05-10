@@ -10,6 +10,7 @@ except ImportError:
     import pickle
 import argparse
 import sys
+import os
 import re
 import time
 import pandas as pd
@@ -109,22 +110,30 @@ if __name__ == '__main__':
 
     start = time.time()
     inf = {}
-    dfs = []
     pe.extend(se)
-    for key in pe:
-        sys.stdout.write("%s\n" % key)
-        names = re.split('\.|-', key)
-        stringname = names[-2]
-        file_handle = open("%s.pkl" % key, 'rb')
-        d = pickle.load(file_handle)
-        file_handle.close()
-        df = pd.DataFrame(d,index=[stringname]).T
-        dfs.append(df)
+    for index,key in enumerate(pe):
+        if index==0:
+            sys.stdout.write("%s\n" % key)
+            names = re.split('\.|-', key)
+            stringname = names[-2]
+            file_handle = open("%s.pkl" % key, 'rb')
+            d = pickle.load(file_handle)
+            file_handle.close()
+            df_first = pd.DataFrame(d,index=[stringname]).T
+        else:
+            sys.stdout.write("%s\n" % key)
+            names = re.split('\.|-', key)
+            stringname = names[-2]
+            file_handle = open("%s.pkl" % key, 'rb')
+            d = pickle.load(file_handle)
+            file_handle.close()
+            df = pd.DataFrame(d,index=[stringname]).T
+            df_first = pd.concat([df_first,df], axis=1)
+        
     end = time.time()
     sys.stdout.write("load data run time: %s\n" % (end-start))
     start = time.time()
-    result = pd.concat(dfs, axis=1)
-    result.to_csv(outputfile,sep="\t",header=True)
+    df_first.to_csv(outputfile,sep="\t",header=True)
     end = time.time()
     sys.stdout.write("concat step run time: %s\n" % (end-start))
     # with open(outputfile, "w") as fqout:
