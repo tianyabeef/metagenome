@@ -42,11 +42,12 @@ def read_pe(pe):
                 query = tabs[0]
                 refer = tabs[7]
                 flag = tabs[4]
-                outstring = "%s\tP\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
-                if inf.has_key(query):
-                    inf[query] = "%s,%s" % (outstring, inf[query])
-                else:
-                    inf[query] = outstring
+                if flag == "a":
+                    outstring = "%s\tP\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
+                    if inf.has_key(query):
+                        inf[query] = "%s,%s" % (outstring, inf[query])
+                    else:
+                        inf[query] = outstring
         f1 = file("%s.pkl" % key, 'wb')
         pickle.dump(inf,f1,protocol=2)
         f1.close()
@@ -65,11 +66,12 @@ def read_se(se):
                 query = tabs[0]
                 refer = tabs[7]
                 flag = tabs[4]
-                outstring = "%s\tS\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
-                if inf.has_key(query):
-                    inf[query] = "%s,%s" % (outstring, inf[query])
-                else:
-                    inf[query] = outstring
+                if flag=="a":
+                    outstring = "%s\tS\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
+                    if inf.has_key(query):
+                        inf[query] = "%s,%s" % (outstring, inf[query])
+                    else:
+                        inf[query] = outstring
         f1 = file("%s.pkl" % key, 'wb')
         pickle.dump(inf,f1,protocol=2)
         f1.close()

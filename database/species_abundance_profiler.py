@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*- #
 import argparse
 import sys
-
+import pandas as pd
+import time
 def read_params(args):
     parser = argparse.ArgumentParser(description='''species abundance profile ''')
     parser.add_argument('-i', '--match_file', dest='match_file', metavar='FILE', type=str, required=True,
@@ -21,21 +22,20 @@ if __name__ == '__main__':
     species_abundance = params["species_abundance"] #输出结果
     logout = params["log"] #出来log文件
 
-    super_tmp = {}
-    #tax = {}
+    super_tmp = {} #????
     species = {}
-    species_len = {}
-    species_average_length = {}
+    strains_len = {}
+    #strains_average_length = {}
     with open("/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.TAX","r") as fq:
         for line in fq:
             tabs = line.strip().split("\t")
-            #tax[tabs[0]] = tabs[-2] #登入号对应种
-            species[tabs[0]] = tabs[-1] #登入号对应菌株
+            species[tabs[0]] = tabs[-1] #登入号对应物种
             super_tmp[tabs[0]] = tabs[1] #登入号对应界
     with open("/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.SIZE","r") as fq:
        for line in fq:
            tabs = line.strip().split("\t")
-           species_len[tabs[0]] = tabs[2] #菌株的长度
+           strains_len[tabs[0]] = tabs[2] #菌株的长度
+
     species_name = {} #物种的名称
     species_value_unique = {}
     species_value_multiple = {}
@@ -45,125 +45,63 @@ if __name__ == '__main__':
     reads_belong_multiple_species = {}
     with open(match_file,"r") as infq:
         for line in infq:
-            if line.startswith(">"):
+                if line.startswith(","):
+                    continue
                 tabs = line.strip().split(",")
-                query = tabs.pop(0)
-                if query:
-                    species_tem = {}
-                    strains_tem = {}
-                    reads_gi = {}
-                    for key in tabs:
-                        chot = key.strip().strip("\"").split("\t")
-                        if ( ( (chot[1] == "P") and (chot[3] == "a") ) or (chot[1] == "S")):
-                            pass
+                query = tabs.pop(0)#reads编号
+
+                species_tem = {}#物种库
+                #strains_tem = {}#菌株库
+                reads_gi = {}
+                for key in tabs:
+                    if not key:
+                        continue
+                    chot = key.strip().strip("\"").split("\t")
+                    if ( ( (chot[1] == "P") and (chot[3] == "b") ) or (chot[1] == "S")):
+                        sys.stdout.write("warning hava s or pa\n")
+                    else:
+                        speciesName = species[chot[0]]
+                        # if species_tem.has_key(speciesName):
+                        #     species_tem[speciesName] +=1
+                        # else:
+                        #     species_tem[speciesName] = 1
+                        #strains_tem[strains_tem] = 1
+                        if reads_gi.has_key(speciesName):
+                            reads_gi[speciesName].append(chot[0])
                         else:
-                            species_tem = species[chot[0]]
-                            #strains_tem = strains[chot[0]]
-                            if not species_tem.has_key(chot[0]):
-                                continue
-                            species_tem[species_tem] = 1
-                            #strains_tem[strains_tem] = 1
-                            reads_gi["G"] = "%s%s\t" % (reads_gi["G"],chot[0])
-                            species_name[species_tem] = 1
-                    if len(species_tem.keys()) == 1:
-                        if len(strains_tem.keys()) ==1:
+                            reads_gi[speciesName] = []
+                            reads_gi[speciesName].append(chot[0])
+                        #species_name[species_tem] = 1
+                for key,value in reads_gi.items():
+                    le = 0
+                    total_length = 0
+                    for gi in value:
+                        le = strains_len[gi]
+                        total_length += float(le)
+                    if len(reads_gi.keys()) == 1 :
+                        print "%s\t%s" % (key,1/(float(total_length)/float(len(value))))
+                        if float(total_length)/float(len(value))==le:
                             reads_unique_num +=1
+                        if species_value_unique.has_key(key):
+                            species_value_unique[key] += 1/(float(total_length)/float(len(value)))
                         else:
-                            reads_multip_unispecies_num += 1
-                        gi_pool = reads_gi["G"].split("\t")
-                        le = 0
-                        total_length = 0
-                        for gi in gi_pool:
-                            ss = tax[gi]
-                            le = 3.5e6
-                            if strains_len.has_key(gi):
-                                le = strains_len[gi]
-                                total_length += le
-                                if len(strains_tem.keys())==1:
-                                    if len(strains_tem.keys())>1:
-                                        uv = total_length/len(strains_tem.keys())
-                                        strains_average_length[ss] = uv
-                                        species_value_unique[ss] +=1/uv
-                    elif len(species_tem.keys())>1:
-                        reads_multip_mulspecies_num += 1
-                        pool = species_tem.keys()
-                        reads_belong_multiple_species[query] = "\t".join(pool)
+                            species_value_unique[key] = 1/(float(total_length)/float(len(value)))
+                        reads_multip_unispecies_num += 1
+                    elif len(reads_gi.keys()) > 1 :
+                        print "%s\t%s" % (key,1/float(len(reads_gi))/(float(total_length)/float(len(value))))
+                        if species_value_unique.has_key(key):
+                            species_value_unique[key] += 1/float(len(reads_gi))/(float(total_length)/float(len(value)))
+                        else:
+                            species_value_unique[key] = 1/float(len(reads_gi))/(float(total_length)/float(len(value)))
+                    reads_multip_mulspecies_num += 1
 
     with open(logout,"w") as log:
         log.write("%s\t%s\t%s\n" % (reads_unique_num,reads_multip_unispecies_num,reads_multip_mulspecies_num))
-        for key in reads_belong_multiple_species:
-            species = reads_belong_multiple_species[key].split("\t")
-            sum = 0
-            for ss in species:
-                if species_value_unique.has_key(ss):
-        sum += species_value_unique{ss}
-        if sum > 0:
-            for q in species:
-                coefficient = 0
-        if species_value_unique.has_key(q):
-            coefficient = species_value_unique[q]
-            if coefficient>0:
-                multiple_value = coefficient / sum / strains_average_length[q]
-            if coefficient > 0:
-                species_value_multiple[q] += multiple_value
-        for s_name in species_name.keys():
-            unique_value = 0
-            multiple_value = 0
-        if species_value_unique.has_key(s_name):
-            unique_value = species_value_unique[s_name]
-        if species_value_multiple.has_key(s_name):
-            multiple_value = species_value_multiple[s_name]
-    ssum[s_name] = unique_value + multiple_value
-    sum += ssum[s_name]
+
     with open(species_abundance,"w") as out:
-        for s_name in species_name.keys():
-            ssum[s_name]=ssum[s_name]/sum
-            if ssum[s_name]>0:
-            out.write("%s\t%s\n") % (s_name,ssum[s_name])
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-foreach my $q (keys %READS_belong_Multiple_Species){
-
-my @SPECIES = split /\t/,$READS_belong_Multiple_Species{$q};
-my $sum = 0;
-    foreach my $SS (@SPECIES){
-    $sum += $Species_value_Unique{$SS} if exists $Species_value_Unique{$SS};
-    }
-
-    if ($sum > 0){
-        foreach my $Q (@SPECIES){
-        my $coefficient = 0;
-           $coefficient = $Species_value_Unique{$Q} if (exists $Species_value_Unique{$Q});
-        my $multiple_value = $coefficient / $sum / $av_LENGTH{$Q} if ($coefficient > 0);
-           $Species_value_Multiple{$Q} += $multiple_value if ($coefficient > 0);
-        }
-    }
-}
-my %SSUM;
-my $sum;
-foreach my $S_name (keys %species_name){
-    my $Unique_value = 0;
-    my $Multiple_value = 0;
-       $Unique_value = $Species_value_Unique{$S_name} if exists $Species_value_Unique{$S_name};
-       $Multiple_value = $Species_value_Multiple{$S_name} if exists $Species_value_Multiple{$S_name};
-    $SSUM{$S_name} = $Unique_value + $Multiple_value;
-    $sum += $SSUM{$S_name};
-}
-foreach my $S_name (keys %species_name){
-    $SSUM{$S_name} /= $sum;
-    print OT "$S_name\t$SSUM{$S_name}\n" if $SSUM{$S_name} > 0;
-}
-
+        df = pd.DataFrame(species_value_unique,index=["a"])
+        total_abundance = float(df.sum(axis=1))
+        print df
+        print float(total_abundance)
+        for key,value in species_value_unique.items():
+            out.write("%s\t%s\n" % (key,(float(value)/float(total_abundance))))
