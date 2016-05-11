@@ -21,37 +21,29 @@ if __name__ == '__main__':
     match_file = params["match_file"] #解析出来的match文件
     species_abundance = params["species_abundance"] #输出结果
     logout = params["log"] #出来log文件
-
-    super_tmp = {} #????
     species = {}
     strains_len = {}
-    #strains_average_length = {}
     with open("/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.TAX","r") as fq:
         for line in fq:
             tabs = line.strip().split("\t")
             species[tabs[0]] = tabs[-1] #登入号对应物种
-            super_tmp[tabs[0]] = tabs[1] #登入号对应界
     with open("/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.SIZE","r") as fq:
        for line in fq:
            tabs = line.strip().split("\t")
            strains_len[tabs[0]] = tabs[2] #菌株的长度
 
-    species_name = {} #物种的名称
+    starttime = time.time()
     species_value_unique = {}
-    species_value_multiple = {}
     reads_unique_num = 0
     reads_multip_unispecies_num = 0
     reads_multip_mulspecies_num = 0
-    reads_belong_multiple_species = {}
     with open(match_file,"r") as infq:
         for line in infq:
                 if line.startswith(","):
                     continue
                 tabs = line.strip().split(",")
                 query = tabs.pop(0)#reads编号
-
                 species_tem = {}#物种库
-                #strains_tem = {}#菌株库
                 reads_gi = {}
                 for key in tabs:
                     if not key:
@@ -61,17 +53,11 @@ if __name__ == '__main__':
                         sys.stdout.write("warning hava s or pa\n")
                     else:
                         speciesName = species[chot[0]]
-                        # if species_tem.has_key(speciesName):
-                        #     species_tem[speciesName] +=1
-                        # else:
-                        #     species_tem[speciesName] = 1
-                        #strains_tem[strains_tem] = 1
                         if reads_gi.has_key(speciesName):
                             reads_gi[speciesName].append(chot[0])
                         else:
                             reads_gi[speciesName] = []
                             reads_gi[speciesName].append(chot[0])
-                        #species_name[species_tem] = 1
                 for key,value in reads_gi.items():
                     le = 0
                     total_length = 0
@@ -80,21 +66,25 @@ if __name__ == '__main__':
                         total_length += float(le)
                     if len(reads_gi.keys()) == 1 :
                         print "%s\t%s" % (key,1/(float(total_length)/float(len(value))))
-                        if float(total_length)/float(len(value))==le:
+                        print (float(total_length)/float(len(value)))
+                        print le
+                        if (float(total_length)/float(len(value)))==float(le):
                             reads_unique_num +=1
+                        else:
+                            reads_multip_unispecies_num += 1
                         if species_value_unique.has_key(key):
                             species_value_unique[key] += 1/(float(total_length)/float(len(value)))
                         else:
                             species_value_unique[key] = 1/(float(total_length)/float(len(value)))
-                        reads_multip_unispecies_num += 1
                     elif len(reads_gi.keys()) > 1 :
                         print "%s\t%s" % (key,1/float(len(reads_gi))/(float(total_length)/float(len(value))))
                         if species_value_unique.has_key(key):
                             species_value_unique[key] += 1/float(len(reads_gi))/(float(total_length)/float(len(value)))
                         else:
                             species_value_unique[key] = 1/float(len(reads_gi))/(float(total_length)/float(len(value)))
-                    reads_multip_mulspecies_num += 1
-
+                        reads_multip_mulspecies_num += 1/float(len(reads_gi))
+    endtime = time.time()
+    sys.stdout.write("static abundance time :%s second\n" % (endtime-starttime))
     with open(logout,"w") as log:
         log.write("%s\t%s\t%s\n" % (reads_unique_num,reads_multip_unispecies_num,reads_multip_mulspecies_num))
 
