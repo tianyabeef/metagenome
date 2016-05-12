@@ -65,9 +65,6 @@ if __name__ == '__main__':
                         le = strains_len[gi]
                         total_length += float(le)
                     if len(reads_gi.keys()) == 1 :
-                        print "%s\t%s" % (key,1/(float(total_length)/float(len(value))))
-                        print (float(total_length)/float(len(value)))
-                        print le
                         if (float(total_length)/float(len(value)))==float(le):
                             reads_unique_num +=1
                         else:
@@ -77,7 +74,6 @@ if __name__ == '__main__':
                         else:
                             species_value_unique[key] = 1/(float(total_length)/float(len(value)))
                     elif len(reads_gi.keys()) > 1 :
-                        print "%s\t%s" % (key,1/float(len(reads_gi))/(float(total_length)/float(len(value))))
                         if species_value_unique.has_key(key):
                             species_value_unique[key] += 1/float(len(reads_gi))/(float(total_length)/float(len(value)))
                         else:
@@ -91,7 +87,5 @@ if __name__ == '__main__':
     with open(species_abundance,"w") as out:
         df = pd.DataFrame(species_value_unique,index=["a"])
         total_abundance = float(df.sum(axis=1))
-        print df
-        print float(total_abundance)
         for key,value in species_value_unique.items():
             out.write("%s\t%s\n" % (key,(float(value)/float(total_abundance))))
