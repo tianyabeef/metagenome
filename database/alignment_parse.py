@@ -30,9 +30,9 @@ def read_params(args):
 
 
 def read_pe(pe):
-    pkl_files = []
-    for key in pe:
+    for index,key in  enumerate(pe):
         inf = {}
+        start = time.time()
         with open(key, "r") as fq:
             names = re.split('\.|-', key)
             stringname = names[-2]
@@ -48,15 +48,21 @@ def read_pe(pe):
                         inf[query] = "%s,%s" % (outstring, inf[query])
                     else:
                         inf[query] = outstring
-        f1 = file("%s.pkl" % key, 'wb')
-        pickle.dump(inf,f1,protocol=2)
-        f1.close()
+        if index==0:
+            df_first = pd.DataFrame(inf,index=[stringname]).T
+        else:
+            df = pd.DataFrame(inf,index=[stringname]).T
+            df_first = pd.concat([df_first,df], axis=1)
+        end = time.time()
+        sys.stdout.write("load %s data run time: %s\n" % (stringname,end-start))
 
+    return df_first
 
-def read_se(se):
+def read_se(se,df_first):
     pkl_files = []
     for key in se:
         inf = {}
+        start = time.time()
         with open(key, "r") as fq:
             names = re.split('\.|-', key)
             stringname = names[-2]
@@ -72,9 +78,14 @@ def read_se(se):
                         inf[query] = "%s,%s" % (outstring, inf[query])
                     else:
                         inf[query] = outstring
-        f1 = file("%s.pkl" % key, 'wb')
-        pickle.dump(inf,f1,protocol=2)
-        f1.close()
+        df = pd.DataFrame(inf,index=[stringname]).T
+        df_first = pd.concat([df_first,df], axis=1)
+        end = time.time()
+        sys.stdout.write("load %s data run time: %s\n" % (stringname,end-start))
+    return df_first
+#        f1 = file("%s.pkl" % key, 'wb')
+#        pickle.dump(inf,f1,protocol=2)
+#        f1.close()
 
 
 
@@ -85,6 +96,7 @@ if __name__ == '__main__':
     analysis_type = params["type"]
     pe = []
     se = []
+#    inf = {}
     with open(inputfile, "r") as fq:
         for line in fq:
             tabs = line.strip().split("\t")
@@ -103,41 +115,16 @@ if __name__ == '__main__':
 
     if len(pe)>0:
         sys.stdout.write("start work PE\n")
-        read_pe(pe)
+        df_first = read_pe(pe)
     if len(se)>0:
         sys.stdout.write("start work SE\n")
-        read_se(se)
+        df_first = read_se(se,df_first)
     end = time.time()
-    sys.stdout.write("run time: %s\n" % (end-start))
+    sys.stdout.write("load all file time: %s\n" % (end-start))
 
-    start = time.time()
-    inf = {}
-    pe.extend(se)
-    for index,key in enumerate(pe):
-        if index==0:
-            sys.stdout.write("%s\n" % key)
-            names = re.split('\.|-', key)
-            stringname = names[-2]
-            file_handle = open("%s.pkl" % key, 'rb')
-            d = pickle.load(file_handle)
-            file_handle.close()
-            df_first = pd.DataFrame(d,index=[stringname]).T
-        else:
-            sys.stdout.write("%s\n" % key)
-            names = re.split('\.|-', key)
-            stringname = names[-2]
-            file_handle = open("%s.pkl" % key, 'rb')
-            d = pickle.load(file_handle)
-            file_handle.close()
-            df = pd.DataFrame(d,index=[stringname]).T
-            df_first = pd.concat([df_first,df], axis=1)
-        
-    end = time.time()
-    sys.stdout.write("load data run time: %s\n" % (end-start))
+
     start = time.time()
     df_first.to_csv(outputfile,sep=",",header=True)
     end = time.time()
     sys.stdout.write("concat step run time: %s\n" % (end-start))
-    # with open(outputfile, "w") as fqout:
-    #     for key, value in inf.items():
-    #         fqout.write(">%s\n%s\n" % (key, value))
+
