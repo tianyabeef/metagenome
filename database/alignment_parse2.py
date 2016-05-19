@@ -138,8 +138,8 @@ if __name__ == '__main__':
     for key in pkl_list:
         df = pd.DataFrame.from_csv(key,header=0,sep=",",index_col=0)
         df_list.append(df)
-    pd.concat(df_list, axis=1)
-    df.to_csv(outputfile,sep=",",header=True)
+    df_final = pd.concat(df_list, axis=1)
+    df_final.to_csv(outputfile,sep=",",header=True)
     end = time.time()
     sys.stdout.write("concat step run time: %s\n" % (end-start))
 
