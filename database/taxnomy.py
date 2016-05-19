@@ -12,7 +12,7 @@ def read_params(args):
     parser = argparse.ArgumentParser(description='group file change')
     parser.add_argument('-i', '--input', dest='input', metavar='input', type=str, required=True,
                         help="abundance of list file")
-    parser.add_argument('-o', '--outputdir', dest='outputdir', metavar='outputdir', type=str, required=True,
+    parser.add_argument('-o', '--outputdir', dest='outputdir', metavar='outputdir', type=str,
                         help="out put dir")
     args = parser.parse_args()
     params = vars(args)
@@ -50,6 +50,7 @@ if __name__ == '__main__':
             with open(line.strip(),"r") as fq2:
                 for line_abu in fq2:
                     species,abun = line_abu.strip().split("\t")
+		    print species
                     genus_abun[genus_pro[species]] += abun
                     family_abun[family_pro[species]] += abun
                     order_abun[order_pro[species]] += abun
