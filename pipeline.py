@@ -11,10 +11,10 @@ from matplotlib import pylab
 import argparse
 import os
 import sys
-from ConfigParser import ConfigParser
-
+from workflow.util import configparserself
+from workflow.util import error
 from workflow.node import Node
-from workflow.configObj import ConfigObj
+#from workflow.configObj import ConfigObj
 from workflow.util.globals import const
 
 
@@ -29,23 +29,23 @@ def read_params(args):
 if __name__ == '__main__':
     config_default_dir = const.config_default_dir
     step_names_order = const.step_names_order
-
-    args = sys.argv
-    params = read_params(args)
+    params = read_params(sys.argv)
     config_path = params.config_path
-
-    config = ConfigParser()
+    config = configparserself.ConfigParserSelf()
     config.read(config_path)
-    work_dir = config.get("param","work_dir")
-    sample_name = config.get("param","sample_name")
-
-    step_names = step_names_order.split(",")
+    option_value = config.read_config()
+    work_dir = option_value['work_dir']
+    step_names = option_value['step_names_order']
+    step_names_all = step_names_order.split(",")
     pipeline = []
     for name in step_names:
-        step_dir = "%s/%s/" % (work_dir,name)
-        step1 = Node(name, path=step_dir)
-        step1.cp_config_node(work_dir)
-        pipeline.append(step1)
+        if name in step_names_all:
+            step_dir = "%s/%s/" % (work_dir,name)
+            step1 = Node(name, path=step_dir)
+            step1.cp_config_node(work_dir)
+            pipeline.append(step1)
+        else:
+            raise error.NoStepError("no have %s step" % name,name)
     step0,step1,step2,step3,step4,step5,step6= pipeline
     config_step0 = ConfigParser()
     config_step0.read(step0.config)
