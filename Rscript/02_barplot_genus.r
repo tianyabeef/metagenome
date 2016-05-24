@@ -1,5 +1,5 @@
 tax_level="genus"
-profile <- read.table("../profile/genus.profile", header = T, check.names = F,quote="",sep="\t"，row.names=1);
+profile <- read.table("../profile/genus.profile", header = T, check.names = F,quote="",sep="\t",row.names=1);
 number  <- 15;
 ## reorder
 #neworder = as.character(unlist(read.table("species/top20/20150717/bar/sample.order.list")))
