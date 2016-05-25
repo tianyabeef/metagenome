@@ -35,7 +35,7 @@ if __name__ == '__main__':
     config.read(config_path)
     option_value = config.read_config()
     work_dir = option_value['work_dir']
-    step_names = option_value['step_names_order']
+    step_names = option_value['step_names_order'].split(",")
     step_names_all = step_names_order.split(",")
     steps = []
     for name in step_names:
@@ -43,8 +43,10 @@ if __name__ == '__main__':
             step_dir = "%s/%s/" % (work_dir,name)
             step1 = Node(name, path=step_dir)
             step1.cp_config_node(work_dir)
+            step1.cp_sh_node(work_dir)
             steps.append(step1)
         else:
+            print name
             raise error.NoStepError("no have %s step" % name,name)
 #    step0,step1,step2,step3,step4,step5,step6= steps
 #    config_step0 = ConfigParser()

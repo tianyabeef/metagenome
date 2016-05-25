@@ -14,6 +14,7 @@ from ConfigParser import ConfigParser
 config_file_suffix = glo.const.config_file_suffix
 shell_file_suffix = glo.const.shell_file_suffix
 config_default_dir = glo.const.config_default_dir
+sh_default_dir = glo.const.sh_default_dir
 
 
 class Node(object):
@@ -48,7 +49,7 @@ class Node(object):
         else:
             sys.stderr.write("the %s step no add default config : %s \n" % (self.name,config_default_file))
     def cp_sh_node(self,work_dir):
-        sh_default_file = "%s/%s" % (config_default_dir,self.shellName)
+        sh_default_file = "%s/%s" % (sh_default_dir,self.shellName)
         if os.path.exists(sh_default_file):
             os.popen("cp %s %s" % (sh_default_file,self.shell))
         else:

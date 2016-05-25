@@ -128,9 +128,10 @@ class ConfigParserSelf(conp.SafeConfigParser):
         sections = self.sections()
         option_value = {}
         for value in sections:
-            items_vlaue = self.items(value)
-            if not items_vlaue:
-                for item in items_vlaue:
+            items_value = self.items(value)
+            
+            if items_value:
+                for item in items_value:
                     option_value[item[0]] = item[1]
         return  option_value
     def rewrite_config(self,config_path):
@@ -139,11 +140,11 @@ class ConfigParserSelf(conp.SafeConfigParser):
         sections = config.sections()
         tmp_value = {}
         for value in sections:
-            items_vlaue = config.items(value)
+            items_value = config.items(value)
             if value not in self.sections():
                 self.add_section(value)
-            if not items_vlaue:
-                self.set(value,items_vlaue[0],items_vlaue[1])
+            if items_value:
+                self.set(value,items_value[0],items_value[1])
 
 
 
