@@ -37,22 +37,22 @@ if __name__ == '__main__':
     work_dir = option_value['work_dir']
     step_names = option_value['step_names_order']
     step_names_all = step_names_order.split(",")
-    pipeline = []
+    steps = []
     for name in step_names:
         if name in step_names_all:
             step_dir = "%s/%s/" % (work_dir,name)
             step1 = Node(name, path=step_dir)
             step1.cp_config_node(work_dir)
-            pipeline.append(step1)
+            steps.append(step1)
         else:
             raise error.NoStepError("no have %s step" % name,name)
-    step0,step1,step2,step3,step4,step5,step6= pipeline
-    config_step0 = ConfigParser()
-    config_step0.read(step0.config)
-    rawlink = config_step0.get("script","01_rawlink")
-    step0.command = "python %s -i %s -o %s" % (rawlink,sample_name,step0.path)
-    config_step0.write(open(step0.config,"w"))
-    step0.create_shell()
+#    step0,step1,step2,step3,step4,step5,step6= steps
+#    config_step0 = ConfigParser()
+#    config_step0.read(step0.config)
+#    rawlink = config_step0.get("script","01_rawlink")
+ #   step0.command = "python %s -i %s -o %s" % (rawlink,sample_name,step0.path)
+#    config_step0.write(open(step0.config,"w"))
+ #   step0.create_shell()
 
 
 

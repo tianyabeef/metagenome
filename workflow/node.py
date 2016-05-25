@@ -47,6 +47,12 @@ class Node(object):
             config.write(open(self.config,mode="w"))
         else:
             sys.stderr.write("the %s step no add default config : %s \n" % (self.name,config_default_file))
+    def cp_sh_node(self,work_dir):
+        sh_default_file = "%s/%s" % (config_default_dir,self.shellName)
+        if os.path.exists(sh_default_file):
+            os.popen("cp %s %s" % (sh_default_file,self.shell))
+        else:
+            sys.stderr.write("the %s step no add default sh : %s \n" % (self.name,sh_default_file))
     def create_shell(self):
         if os.path.exists(self.shell ):
             sys.stderr.write("Covered the file before:%s\n" % self.shell)
