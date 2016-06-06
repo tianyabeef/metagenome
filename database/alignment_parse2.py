@@ -41,7 +41,11 @@ def read_pe(pe):
             for line in fq:
                 tabs = line.strip().split("\t")
                 query = tabs[0]
-                refer = tabs[7]
+                try:
+                    refer = tabs[7]
+                except IndexError:
+                    sys.stderr.write("%s no have tabs[7]%s split %s\n" % (key,line,tabs))
+                    continue
                 flag = tabs[4]
                 if flag == "a":
                     outstring = "%s\tP\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])

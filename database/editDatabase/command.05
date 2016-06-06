@@ -1,0 +1,1 @@
+python ../../NCBI_Bacteria/20160326/accession/gi2tax_3.py accession/fna.list /data_center_06/Database/NCBI_Archaea/20160525/accession

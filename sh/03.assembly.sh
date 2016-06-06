@@ -1,8 +1,9 @@
-#perl /data_center_03/USER/zhongwd/rd/12_soap_denovo/soapdenovo_shell_maker.pl -l clean_reads_list -i ../ins.list -minkmer 51 -maxkmer 63 -b 4
-#nohup /data_center_03/USER/zhongwd/bin/qsge --queue big.q,all.q,neo.q --resource vf=60G:5G:20G:3G --maxjob 4 --lines 4 --jobprefix AS -getmem shell/assembly.err.err.err.sh &
+perl /data_center_03/USER/zhongwd/rd/12_soap_denovo/soapdenovo_shell_maker.pl -l clean_reads_list -i ../ins.list -minkmer 51 -maxkmer 63 -b 4
+nohup /data_center_03/USER/zhongwd/bin/qsge --queue big.q,all.q,neo.q --resource vf=60G:5G:20G:3G --maxjob 4 --lines 4 --jobprefix AS -getmem shell/assembly.sh &
+#cp /data_center_01/pipeline/huangy/metagenome/sh/check.sh ./
 
 ## best contigs
-mkdir ../04.gene_predict
+#mkdir ../04.gene_predict
 ls assembly/*/*/*scafSeq |while read a ; do  perl /data_center_06/Project/LiuLin-ascites-stool/03.assembly/bin/N_spliter.pl $a $a.cut 500; done
 ls assembly/*/*/*scafSeq.cut | while read a ; do perl /data_center_06/Project/LiuLin-ascites-stool/03.assembly/bin/N50_counter.pl < $a > $a.sort 2> $a.stat; done
 list assembly/*/* | perl /data_center_06/Project/LiuLin-ascites-stool/03.assembly/bin/best_contig_selecter.pl > ../04.gene_predict/scaftigs.list
