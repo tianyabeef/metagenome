@@ -38,4 +38,4 @@ cut -f 1 ../01.clean_reads/sample.list | while read a ; do cut -f 1 ../06.gene_p
 ls samples/*gene.list | sed 's/.gene.list//g'|while read a; do perl /data_center_02/Database/eggNOGv4.0/04_get_countlist.pl eggnog.m8.tab /data_center_02/Database/eggNOGv4.0/eggnogv4.funccats.txt $a.gene.list $a.eggnog.tab;done
 ls samples/*.eggnog.tab | sed 's/.eggnog.tab//g' | while read a;do cut -f 3,4 $a.eggnog.tab > $a.eggnog.count.tab; done
 ls samples/*.eggnog.count.tab | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > eggnog.count.tab
-Rscript /data_center_04/Projects/pichongbingdu/pair_reads/05.eggnog/NOG.R eggnog.count.tab
+Rscript /data_center_04/Projects/pichongbingdu/pair_reads/08.eggnog/NOG.R eggnog.count.tab

@@ -1,1 +1,4 @@
-python ../../NCBI_Bacteria/20160326/accession/gi2tax_3.py accession/fna.list /data_center_06/Database/NCBI_Archaea/20160525/accession
+pwd_path=/data_center_06/Database/NCBI_Fungi/20160601
+mkdir $pwd_path/accession/
+less $pwd_path/command.03 |cut -f 3 -d " " > $pwd_path/accession/fna.list
+python /data_center_01/pipeline/huangy/metagenome/database/editDatabase/gi2tax_3.py $pwd_path/accession/fna.list $pwd_path/accession

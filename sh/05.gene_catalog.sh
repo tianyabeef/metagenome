@@ -41,5 +41,5 @@ gzip -c redundant.gene_catalog.fna > redundant.gene_catalog.fna.gz
 gzip -c gene_catalog.fna > gene_catalog.fna.gz
 gzip -c gene_catalog.faa > gene_catalog.faa.gz
 
-#perl /data_center_06/Project/LiuLin-ascites-stool/03.assembly/bin/stat.pl < gene_catalog.fna > gene_catalog.stat.tsv
+perl /data_center_06/Project/LiuLin-ascites-stool/03.assembly/bin/stat.pl < gene_catalog.fna > gene_catalog.stat.tsv
 
