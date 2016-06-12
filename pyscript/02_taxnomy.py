@@ -58,19 +58,19 @@ if __name__ == '__main__':
                     phylum_abun[phylum_pro[species]] = abun + phylum_abun[phylum_pro[species]] if phylum_abun.has_key(phylum_pro[species]) else abun
 
 
-    with open("%s.genus.abundance" % name,"w") as fqw:
-        for key,value in genus_abun.items():
-            fqw.write("%s\t%s\n" % (key,value))
-    with open("%s.family.abundance" % name,"w") as fqw:
-        for key,value in family_abun.items():
-            fqw.write("%s\t%s\n" % (key,value))
-    with open("%s.order.abundance" % name,"w") as fqw:
-        for key,value in order_abun.items():
-            fqw.write("%s\t%s\n" % (key,value))
-    with open("%s.class.abundance" % name,"w") as fqw:
-        for key,value in class_abun.items():
-            fqw.write("%s\t%s\n" % (key,value))
-    with open("%s.phylum.abundance" % name,"w") as fqw:
-        for key,value in phylum_abun.items():
-            fqw.write("%s\t%s\n" % (key,value))
+        with open("%s.genus.abundance" % name,"w") as fqw:
+            for key,value in genus_abun.items():
+                fqw.write("%s\t%s\n" % (key,value))
+        with open("%s.family.abundance" % name,"w") as fqw:
+            for key,value in family_abun.items():
+                fqw.write("%s\t%s\n" % (key,value))
+        with open("%s.order.abundance" % name,"w") as fqw:
+            for key,value in order_abun.items():
+                fqw.write("%s\t%s\n" % (key,value))
+        with open("%s.class.abundance" % name,"w") as fqw:
+            for key,value in class_abun.items():
+                fqw.write("%s\t%s\n" % (key,value))
+        with open("%s.phylum.abundance" % name,"w") as fqw:
+            for key,value in phylum_abun.items():
+                fqw.write("%s\t%s\n" % (key,value))
 
