@@ -1,5 +1,5 @@
 ## calculate abundance
-/data_center_03/USER/zhongwd/bin/speciesabundance clean_reads_list
+/data_center_01/pipeline/huangy/metagenome/perlscript/02_speciesabundance clean_reads_list
 nohup /data_center_03/USER/zhongwd/bin/qsge --queue all.q --resource vf=15G --maxjob 10 --jobprefix MA --lines 1 --getmem shell_alignment/match.sh &
 nohup /data_center_03/USER/zhongwd/bin/qsge --queue all.q --resource vf=15G --maxjob 10 --jobprefix AB --lines 2 --getmem shell_alignment/abun.sh &
 
@@ -36,8 +36,8 @@ ls alignment/*/*genus.abundance   | sed 's/alignment\/\(.*\)\/.*genus.abundance/
 
 ## 01.barplot      need finish
 mkdir 01.barplot
-cd 01.barplot; Rscript /data_center_03/USER/zhongwd/temp/0106/barplot/species.barplot.r; cd -
-cd 01.barplot; Rscript /data_center_03/USER/zhongwd/temp/0106/barplot/genus.barplot.r;   cd -
+cd 01.barplot; Rscript /data_center_01/pipeline/huangy/metagenome/Rscript/02_barplot_species.r; cd -
+cd 01.barplot; Rscript /data_center_01/pipeline/huangy/metagenome/Rscript/02_barplot_genus.r;   cd -
 
 ## 02.core
 mkdir 02.core
