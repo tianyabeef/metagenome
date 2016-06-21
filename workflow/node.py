@@ -72,15 +72,16 @@ class Node(object):
         def_opts = []
         for sec in secs:
             kvs = config_def.items(sec)
-            for key,value in kvs.items():
-                config2.set(sec,key,value)
+            config2.add_section(sec)
+            for value in kvs:
+                config2.set(sec,value[0],value[1])
         if opts:
-            for key,value in opts.items():
-                if key != "output_dir":
-                    config2.set("input",key,value)
+            for value in opts:
+                if value[0] != "output_dir":
+                    config2.set("input",value[0],value[1])
                 else:
-                    config2.set("input","input_dir",value)
-        for key.value in option_value.item():
+                    config2.set("input","input_dir",value[1])
+        for key,value in option_value.items():
             config2.set("param",key,value)
         config2.set("output","out_dir",self.path)
         config2.write(open(self.config,mode="w"))
@@ -88,17 +89,17 @@ class Node(object):
     def getconfig(self,path,name):
         opts = []
         configName = "%s.%s" % (name,config_file_suffix)
-        config = "%s/%s" % (path,configName)
-        if os.path.exists(config):
+        configpath = "%s/%s" % (path,configName)
+        if os.path.exists(configpath):
             config = ConfigParser()
-            config.read(config)
+            config.read(configpath)
             secs = config.sections()
             if "output" in secs:
                 opts.append(config.items("output"))
             else:
-                sys.stderr.write("%s havn't output sections" % config)
+                sys.stderr.write("%s havn't output sections" % configpath)
         else:
-            sys.stderr.write("There is no config file: %s \n" % (config))
+            sys.stderr.write("There is no config file: %s \n" % (configpath))
         return opts
     def setshell(self):
         if os.path.exists(self.shell):
@@ -109,7 +110,9 @@ class Node(object):
         complete = touch_sh_file(config,sh_default_file,self.shell,self.name)
         return complete
 
-
+    def mkdir(self):
+        if not os.path.exists(self.path):
+            os.mkdir(self.path)
 
 
 

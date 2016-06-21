@@ -43,8 +43,12 @@ if __name__ == '__main__':
         if name in step_names_all:
             step_dir = "%s/%s/" % (work_dir,name)
             step1 = Node(name, path=step_dir)
-            config = step1.getconfig(work_dir,steps[-1])
-            step1.setconfig(config,{"group":option_value["group"]})
+            step1.mkdir()
+            opts=[]
+            if steps:
+                opts = step1.getconfig(work_dir,steps[-1])
+            print name
+            step1.setconfig(opts,{"group":option_value["group"]})
             complete = step1.setshell()
             if not complete:
                 step1.cp_sh_node()
