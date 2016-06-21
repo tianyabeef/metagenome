@@ -46,7 +46,8 @@ if __name__ == '__main__':
             step1.mkdir()
             opts = []
             if i>0:
-                opts = step1.getconfig(work_dir,steps[i-1])
+                opts = step1.getconfig(work_dir,step_names[i-1])
+            print opts
             step1.setconfig(opts,{"group":option_value["group"]})
             complete = step1.setshell()
             if not complete:

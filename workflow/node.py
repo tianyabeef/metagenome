@@ -45,7 +45,7 @@ class Node(object):
             config = ConfigParser()
             config.read(self.config)
             config.set("param","work_dir", )
-            config.set("param","out_dir",self.path)
+            config.set("param","output_dir",self.path)
             config.write(open(self.config,mode="w"))
         else:
             sys.stderr.write("the %s step no add default config : %s \n" % (self.name,config_default_file))
@@ -77,26 +77,32 @@ class Node(object):
             for value in kvs:
                 config2.set(sec,value[0],value[1])
         if opts:
+            if "input" not in secs_have:
+                config2.add_section("input")
             for value in opts:
                 if value[0] != "output_dir":
                     config2.set("input",value[0],value[1])
                 else:
                     config2.set("input","input_dir",value[1])
         for key,value in option_value.items():
+            if "param" not in secs_have:
+                config2.add_section("param")
             config2.set("param",key,value)
-        config2.set("output","out_dir",self.path)
+        if "output" not in secs_have:
+            config2.add_section("output")
+        config2.set("output","output_dir",self.path)
         config2.write(open(self.config,mode="w"))
 
     def getconfig(self,path,name):
         opts = []
         configName = "%s.%s" % (name,config_file_suffix)
-        configpath = "%s/%s" % (path,configName)
+        configpath = "%s/%s/%s" % (path,name,configName)
         if os.path.exists(configpath):
             config = ConfigParser()
             config.read(configpath)
             secs = config.sections()
             if "output" in secs:
-                opts.append(config.items("output"))
+                opts = config.items("output")
             else:
                 sys.stderr.write("%s havn't output sections" % configpath)
         else:
