@@ -9,6 +9,7 @@ import os
 import sys
 import workflow.util.globals as glo
 from ConfigParser import ConfigParser
+from workflow.control import touch_sh_file
 
 
 config_file_suffix = glo.const.config_file_suffix
@@ -30,12 +31,12 @@ class Node(object):
         if shell is None:
             self.shell = "%s/%s" % (path,self.shellName)
         else:
-            self.config = config
+            self.config = shell
         if commads is not None:
             self.commands = commads
         else:
             self.commands = []
-    def cp_config_node(self,work_dir):
+    def cp_config_node(self):
         if not os.path.exists(self.path):
             os.mkdir(self.path)
         config_default_file = "%s/%s" % (config_default_dir,self.configName)
@@ -43,12 +44,12 @@ class Node(object):
             os.popen("cp %s %s" % (config_default_file, self.config))
             config = ConfigParser()
             config.read(self.config)
-            config.set("param","work_dir",work_dir)
+            config.set("param","work_dir", )
             config.set("param","out_dir",self.path)
             config.write(open(self.config,mode="w"))
         else:
             sys.stderr.write("the %s step no add default config : %s \n" % (self.name,config_default_file))
-    def cp_sh_node(self,work_dir):
+    def cp_sh_node(self):
         sh_default_file = "%s/%s" % (sh_default_dir,self.shellName)
         if os.path.exists(sh_default_file):
             os.popen("cp %s %s" % (sh_default_file,self.shell))
@@ -60,6 +61,55 @@ class Node(object):
         with open(self.shell,"w") as fqout:
             for command in self.commands:
                 fqout.write(command)
+
+    def setconfig(self,opts,option_value):
+        config_default_file = "%s/%s" % (config_default_dir,self.configName)
+        config_def = ConfigParser()
+        config_def.read(config_default_file)
+        config2 = ConfigParser()
+        config2.read(self.config)
+        secs = config_def.sections()
+        def_opts = []
+        for sec in secs:
+            kvs = config_def.items(sec)
+            for key,value in kvs.items():
+                config2.set(sec,key,value)
+        if opts:
+            for key,value in opts.items():
+                if key != "output_dir":
+                    config2.set("input",key,value)
+                else:
+                    config2.set("input","input_dir",value)
+        for key.value in option_value.item():
+            config2.set("param",key,value)
+        config2.set("output","out_dir",self.path)
+        config2.write(open(self.config,mode="w"))
+
+    def getconfig(self,path,name):
+        opts = []
+        configName = "%s.%s" % (name,config_file_suffix)
+        config = "%s/%s" % (path,configName)
+        if os.path.exists(config):
+            config = ConfigParser()
+            config.read(config)
+            secs = config.sections()
+            if "output" in secs:
+                opts.append(config.items("output"))
+            else:
+                sys.stderr.write("%s havn't output sections" % config)
+        else:
+            sys.stderr.write("There is no config file: %s \n" % (config))
+        return opts
+    def setshell(self):
+        if os.path.exists(self.shell):
+            sys.stderr.write("cover the file %s\n" % self.shell)
+
+        config = self.config
+        sh_default_file = "%s/%s" % (sh_default_dir,self.shellName)
+        complete = touch_sh_file(config,sh_default_file,self.shell,self.name)
+        return complete
+
+
 
 
 

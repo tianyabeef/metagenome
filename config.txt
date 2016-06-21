@@ -1,0 +1,7 @@
+[step]
+#step_names_order = "00.raw_reads,01.clean_reads,02predict.taxon,03.assembly,04.gene_predict,05.gene_catalog,06.gene_profile,07.kegg,08.eggnog,09.ardb"
+step_names_order = 01.clean_reads,03.assembly,04.gene_predict,05.gene_catalog,06.gene_profile,07.kegg,08.eggnog,09.ardb
+[param]
+work_dir = /data_center_06/Project/Intestine_Mucosal/
+sample_name =%(work_dir)s/../sample_list/sample.list
+group=%(work_dir)s/../group/group1.txt %(work_dir)s/../group/group2.txt

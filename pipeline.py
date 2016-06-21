@@ -36,14 +36,20 @@ if __name__ == '__main__':
     option_value = config.read_config()
     work_dir = option_value['work_dir']
     step_names = option_value['step_names_order'].split(",")
+    #group = option_value['group'].split("\s+")
     step_names_all = step_names_order.split(",")
     steps = []
     for name in step_names:
         if name in step_names_all:
             step_dir = "%s/%s/" % (work_dir,name)
             step1 = Node(name, path=step_dir)
-            step1.cp_config_node(work_dir)
-            step1.cp_sh_node(work_dir)
+            config = step1.getconfig(work_dir,steps[-1])
+            step1.setconfig(config,{"group":option_value["group"]})
+            complete = step1.setshell()
+            if not complete:
+                step1.cp_sh_node()
+#            step1.cp_config_node()
+#            step1.cp_sh_node()
             steps.append(step1)
         else:
             print name
