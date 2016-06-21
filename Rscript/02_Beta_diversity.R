@@ -9,8 +9,9 @@ group.file   <- arg[3];
 method       <- arg[4];
 source(fun.Rscript);
 profile.data <- read.table(profile.file, check.names = F, header = T,sep="\t",quote="",row.names=1);
-sample.group <- read.table(group.file,   check.names = F, row.names = 1,sep="\t",quote="")[,1];
+sample.group <- read.table(group.file,   check.names = F, row.names = 1,sep="\t",quote="");
+profile.data <- profile.data[,rownames(sample.group)]
 dist.data    <- Dist(t(profile.data), method = method);
-Anosim(dist.data, sample.group, method = method);
-Nmds(  dist.data, sample.group, method = method);
-Pcoa(  dist.data, sample.group, method = method);
+Anosim(dist.data, sample.group[,1], method = method);
+Nmds(  dist.data, sample.group[,1], method = method);
+Pcoa(  dist.data, sample.group[,1], method = method);

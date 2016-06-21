@@ -12,10 +12,10 @@ from Bio import SeqIO
 if __name__ == '__main__':
     args = sys.argv
     args.pop(0)
-    fna_list_path,outpathori,assembly_summary,taxids_info= args
+    fna_list_path,outpathori,assembly_summary,taxids_info_file= args
     j=0
     taxids_info={}
-    with open(taxids_info,"r") as fq:
+    with open(taxids_info_file,"r") as fq:
         fq.next()
         for line in fq:
             tabs = line.strip().split("\t")

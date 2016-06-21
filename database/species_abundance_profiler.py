@@ -23,14 +23,18 @@ if __name__ == '__main__':
     logout = params["log"] #出来log文件
     species = {}
     strains_len = {}
-    with open("/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.TAX","r") as fq:
-        for line in fq:
-            tabs = line.strip().split("\t")
-            species[tabs[0]] = tabs[-1] #登入号对应物种
-    with open("/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.SIZE","r") as fq:
-       for line in fq:
-           tabs = line.strip().split("\t")
-           strains_len[tabs[0]] = tabs[2] #菌株的长度
+    TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
+    SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
+    for ttax in TAXLIST:
+        with open(ttax,"r") as fq:
+            for line in fq:
+                tabs = line.strip().split("\t")
+                species[tabs[0]] = tabs[-1] #登入号对应物种
+    for tsize in SIZELIST:
+        with open(tsize,"r") as fq:
+            for line in fq:
+                tabs = line.strip().split("\t")
+                strains_len[tabs[0]] = tabs[2] #菌株的长度
 
     starttime = time.time()
     species_value_unique = {}

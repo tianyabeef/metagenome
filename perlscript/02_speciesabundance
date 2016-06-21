@@ -1,0 +1,94 @@
+#!/usr/bin/perl -w
+use strict;
+print "usage:\nspeciesabundance clean_reads_list bacteria,fungi,archaea,virus\n" and exit unless @ARGV == 2;
+my $fasta_list = $ARGV[0];
+my $dblist = $ARGV[1];
+my @dbname = split /,/, $dblist;
+my @database;
+my %db;
+
+foreach my $tmp (@dbname){
+	if($tmp eq "bacteria"){
+		open DB,"/data_center_06/Database/NCBI_Bacteria/20160422/database/species_database.list" or die;
+		while (<DB>){
+        		chomp;
+        		@_ = split /\t/;
+        		$db{$_[1]} = $_[0];
+        		push @database,$_[1];
+		}
+		close DB;
+		
+	}
+	elsif($tmp eq "fungi"){
+                open DB,"/data_center_06/Database/NCBI_Fungi/20160601/database/fungi_database.list" or die;
+                while (<DB>){
+                        chomp;
+                        @_ = split /\t/;
+                        $db{$_[1]} = $_[0];
+                        push @database,$_[1];
+                }
+                close DB;
+
+	}
+	elsif($tmp eq "archaea"){
+                open DB,"/data_center_06/Database/NCBI_Archaea/20160525/database/archaea_database.list" or die;
+                while (<DB>){
+                        chomp;
+                        @_ = split /\t/;
+                        $db{$_[1]} = $_[0];
+                        push @database,$_[1];
+                }
+                close DB;
+
+	}elsif($tmp eq "virus"){
+		open DB,"/data_center_06/Database/NCBI_Virus/20160615/database/viral.database.list" or die;
+                while (<DB>){
+                        chomp;
+                        @_ = split /\t/;
+                        $db{$_[1]} = $_[0];
+                        push @database,$_[1];
+                }
+                close DB;
+	}
+	else{
+		print'database name err!'; 
+	}
+}
+#my @database;
+#my %db;
+#open DB,"/data_center_06/Database/NCBI_Bacteria/20160422/database/species_database.list" or die;
+#while (<DB>){
+#	chomp;
+#	@_ = split /\t/;
+#	$db{$_[1]} = $_[0];
+#	push @database,$_[1];
+#}
+#close DB;
+my $parse = "/data_center_01/pipeline/huangy/metagenome/database/alignment_parse2.py";
+my $profile = "/data_center_01/pipeline/huangy/metagenome/database/species_abundance_profiler.py";
+-e "alignment" or `mkdir alignment`;
+-e "shell_alignment" or `mkdir shell_alignment`;
+open SHELL1,">shell_alignment/match.sh" or die $!;
+open SHELL2,">shell_alignment/abun.sh" or die $!;
+open CLEAN,"$fasta_list" or die $!;
+while (<CLEAN>){
+	chomp;
+	my ($name,$a,$b) = split /\s/;
+	-e $a and -e $b or die "clean data $a $b doesn't exist!";
+	$_ = `pwd`;
+	chomp;
+	my $directory = $_."/alignment/$name";
+	-d $directory or `mkdir $directory`;
+	open MATCH_LIST,">$directory/match.list" or die $!;
+	foreach (@database){
+		my $flag = "$directory/$name-$db{$_}";
+		print SHELL1 "soap -a $a -b $b -D $_.index -M 4 -o $flag.pm -2 $flag.sm -r 2 -p 10 -m 100 -x 1000\n";
+		print MATCH_LIST "PE\t$flag.pm\nSE\t$flag.sm\n";
+	}
+	print SHELL2 "python $parse -i $directory/match.list -o $directory/$name.MATCH -t PE\n";
+	print SHELL2 "python $profile -i $directory/$name.MATCH -o $directory/$name.species.abundance -log $directory/$name.MATCH.log\n";
+	close MATCH_LIST;
+}
+close CLEAN;
+close SHELL1;
+close SHELL2;

@@ -4,7 +4,9 @@ nohup /data_center_03/USER/zhongwd/bin/qsge --queue all.q --resource vf=15G --ma
 nohup /data_center_03/USER/zhongwd/bin/qsge --queue all.q --resource vf=15G --maxjob 10 --jobprefix AB --lines 2 --getmem shell_alignment/abun.sh &
 
 ## form species profile
-ls alignment/*/*species.abundance | /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/bin/taxnomy.pl -
+ls alignment/*/*species.abundance >list
+python /data_center_01/pipeline/huangy/metagenome/pyscript/02_taxnomy.py -i list
+rm list
 mkdir profile
 ls alignment/*/*species.abundance | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > profile/species.profile
 ls alignment/*/*genus.abundance   | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > profile/genus.profile
@@ -42,7 +44,7 @@ cd 01.barplot; Rscript /data_center_01/pipeline/huangy/metagenome/Rscript/02_bar
 ## 02.core
 mkdir 02.core
 perl /data_center_06/Project/pracrice/yehaocheng_20160120/02.taxon_group1/bin/core_sum.pl clean_reads_list profile/species.profile > 02.core/core.profile
-cd 02.core; Rscript /data_center_04/Projects/pichongbingdu/pair_reads/02.taxon/core/venn.r core.profile ; cd -
+cd 02.core; Rscript /data_center_01/pipeline/huangy/metagenome/Rscript/02_venn.R core.profile ; cd -
 perl /data_center_03/USER/zhongwd/rd/06_R2svg/flower/flower.pl profile/species.profile > 02.core/species.flower.svg
 cd 02.core; Rscript /data_center_04/Projects/pichongbingdu/pair_reads/02.taxon/core/venn.r ../profile/species.profile; cd -
 
@@ -73,12 +75,25 @@ nohup perl /data_center_03/USER/zhongwd/rd/05_rarecurve/RareCurve/RareCurve.pl -
 #Rscript /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/test/barplot/bartreeplot.r profile/species.profile sample.list 08.cluster/species.clust.pdf
 
 ## 09.pca
-#mkdir 09.pca
+/data_center_01/pipeline/16S_ITS_pipeline_v3.0/script/03_otu_pca.py -i profile/species.profile -g ../group/group3.txt -o group/group3/09.pca --with_boxplot
 #Rscript /data_center_03/USER/zhongwd/temp/0106/PCA/pca.R profile/species.profile sample.list 09.pca/species.pca.pdf
 #Rscript /data_center_03/USER/zhongwd/temp/0106/PCA/pca.R profile/genus.profile   sample.list 09.pca/genus.pca.pdf
 
 ## 11.anosim; 13.pcoa; 14.nmds
-mkdir 11-14.beta_div; mkdir 11-14.beta_div/species; mkdir 11-14.beta_div/genus
-cd 11-14.beta_div/species; perl /data_center_03/USER/zhongwd/bin/Beta_diversity.pl -p ../../profile/species.profile -g ../../sample.list -m bray -r; cd -
-cd 11-14.beta_div/genus;   perl /data_center_03/USER/zhongwd/bin/Beta_diversity.pl -p ../../profile/genus.profile   -g ../../sample.list -m bray -r; cd -
+mkdir group/group1/11-14.beta_div; mkdir group/group1/11-14.beta_div/species;mkdir group/group1/11-14.beta_div/genus
+mkdir group/group2/11-14.beta_div; mkdir group/group2/11-14.beta_div/species;mkdir group/group2/11-14.beta_div/genus
+mkdir group/group3/11-14.beta_div; mkdir group/group3/11-14.beta_div/species;mkdir group/group3/11-14.beta_div/genus
+cd group/group1/11-14.beta_div/species; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/species.profile -g ../../../../../group/group1.txt -m bray -r; cd -
+cd group/group1/11-14.beta_div/genus; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/genus.profile -g ../../../../../group/group1.txt -m bray -r; cd -
+cd group/group2/11-14.beta_div/species; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/species.profile -g ../../../../../group/group2.txt -m bray -r; cd -
+cd group/group2/11-14.beta_div/genus; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/genus.profile -g ../../../../../group/group2.txt -m bray -r; cd -
+cd group/group3/11-14.beta_div/species; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/species.profile -g ../../../../../group/group3.txt -m bray -r; cd -
+cd group/group3/11-14.beta_div/genus; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/genus.profile -g ../../../../../group/group3.txt -m bray -r; cd -
 
+mkdir group/group1/15.LEfSe
+mkdir group/group2/15.LEfSe
+mkdir group/group3/15.LEfSe
+
+/data_center_01/pipeline/16S_ITS_pipeline_v3.0/script/05_LEfSe.py -i profile/species.profile -l /data_center_03/USER/huangy/soft/LEfSe_lzb -g ../group/group1.txt -o group/group1/15.LEfSe/ --LDA 2
+/data_center_01/pipeline/16S_ITS_pipeline_v3.0/script/05_LEfSe.py -i profile/species.profile -l /data_center_03/USER/huangy/soft/LEfSe_lzb -g ../group/group2.txt -o group/group2/15.LEfSe/ --LDA 2
+/data_center_01/pipeline/16S_ITS_pipeline_v3.0/script/05_LEfSe.py -i profile/species.profile -l /data_center_03/USER/huangy/soft/LEfSe_lzb -g ../group/group3.txt -o group/group3/15.LEfSe/ --LDA 2
