@@ -69,10 +69,11 @@ class Node(object):
         config2 = ConfigParser()
         config2.read(self.config)
         secs = config_def.sections()
-        def_opts = []
+        secs_have = config2.sections()
         for sec in secs:
             kvs = config_def.items(sec)
-            config2.add_section(sec)
+            if sec not in secs_have:
+                config2.add_section(sec)
             for value in kvs:
                 config2.set(sec,value[0],value[1])
         if opts:

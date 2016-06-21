@@ -39,15 +39,14 @@ if __name__ == '__main__':
     #group = option_value['group'].split("\s+")
     step_names_all = step_names_order.split(",")
     steps = []
-    for name in step_names:
+    for i,name in enumerate(step_names):
         if name in step_names_all:
             step_dir = "%s/%s/" % (work_dir,name)
             step1 = Node(name, path=step_dir)
             step1.mkdir()
-            opts=[]
-            if steps:
-                opts = step1.getconfig(work_dir,steps[-1])
-            print name
+            opts = []
+            if i>0:
+                opts = step1.getconfig(work_dir,steps[i-1])
             step1.setconfig(opts,{"group":option_value["group"]})
             complete = step1.setshell()
             if not complete:
