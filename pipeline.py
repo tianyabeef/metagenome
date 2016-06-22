@@ -47,7 +47,6 @@ if __name__ == '__main__':
             opts = []
             if i>0:
                 opts = step1.getconfig(work_dir,step_names[i-1])
-            print opts
             step1.setconfig(opts,{"group":option_value["group"]})
             complete = step1.setshell()
             if not complete:
@@ -56,7 +55,6 @@ if __name__ == '__main__':
 #            step1.cp_sh_node()
             steps.append(step1)
         else:
-            print name
             raise error.NoStepError("no have %s step" % name,name)
 #    step0,step1,step2,step3,step4,step5,step6= steps
 #    config_step0 = ConfigParser()

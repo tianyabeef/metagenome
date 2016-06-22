@@ -13,9 +13,13 @@ import sys
 import pandas   as pd
 if __name__ == '__main__':
     args = sys.argv
-    _,profile,group,outfile=args
-    group = pd.read_table(group,sep="\t",header=None).to_dict()[1]
+    _,profile,group,outfile,type=args
+    group = pd.read_table(group,sep="\t",header=None).to_dict()[0]
     data = pd.DataFrame.from_csv(profile,sep="\t")
-    data2 = data[group.keys()]
+    data2 = data[group.values()]
     data3 = data2[data2.sum(axis=1)>0]
+    if type=="species":
+        data3.index = "s__"+data3.index
+    if type=="genus":
+        data3.index = "g__"+data3.index
     data3.to_csv(outfile,sep="\t")
