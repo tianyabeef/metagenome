@@ -19,25 +19,25 @@ from workflow.src.ardb import ardb
 def touch_sh_file(config,sh_default_file,outpath,name):
     commands=""
     if name=="00.raw_reads":
-        commands = raw_reads(config,sh_default_file,outpath)
+        commands = raw_reads(config,sh_default_file,outpath,name)
     elif name=="01.clean_reads":
-        commands = clean_reads(config,sh_default_file,outpath)
+        commands = clean_reads(config,sh_default_file,outpath,name)
     elif name == "02.taxon":
-        commands =taxon(config,sh_default_file,outpath)
+        commands =taxon(config,sh_default_file,outpath,name)
     elif name == "03.assembly":
-        commands = assembly(config,sh_default_file,outpath)
+        commands = assembly(config,sh_default_file,outpath,name)
     elif name == "04.gene_predict":
-        commands = gene_predict(config,sh_default_file,outpath)
+        commands = gene_predict(config,sh_default_file,outpath,name)
     elif name == "05.gene_catalog":
-        commands = gene_catalog(config,sh_default_file,outpath)
+        commands = gene_catalog(config,sh_default_file,outpath,name)
     elif name == "06.gene_profile":
-        commands = gene_profile(config,sh_default_file,outpath)
+        commands = gene_profile(config,sh_default_file,outpath,name)
     elif name == "07.kegg":
-        commands = kegg(config,sh_default_file,outpath)
+        commands = kegg(config,sh_default_file,outpath,name)
     elif name == "08.eggnog":
-        commands = eggnog(config,sh_default_file,outpath)
+        commands = eggnog(config,sh_default_file,outpath,name)
     elif name == "09.ardb":
-        commands = ardb(config,sh_default_file,outpath)
+        commands = ardb(config,sh_default_file,outpath,name)
     else:
         sys.stderr.write("step name is %s not in src" % name)
         return False

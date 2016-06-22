@@ -5,5 +5,5 @@ __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
 
 
-def gene_profile(config,sh_default_file,outpath):
+def gene_profile(config,sh_default_file,outpath,name):
     pass
