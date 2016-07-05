@@ -22,4 +22,5 @@ if __name__ == '__main__':
         data3.index = "s__"+data3.index
     if type=="genus":
         data3.index = "g__"+data3.index
+    data3.index.name="Name"
     data3.to_csv(outfile,sep="\t")

@@ -29,7 +29,7 @@ if __name__ == '__main__':
         with open(ttax,"r") as fq:
             for line in fq:
                 tabs = line.strip().split("\t")
-                species[tabs[0]] = tabs[-1] #登入号对应物种
+                species[tabs[0]] = tabs[7] #登入号对应物种
     for tsize in SIZELIST:
         with open(tsize,"r") as fq:
             for line in fq:

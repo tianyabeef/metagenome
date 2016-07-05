@@ -7,7 +7,7 @@ import  argparse
 import sys
 import re
 GENOME_TXT = "/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.TAX"
-
+TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
 def read_params(args):
     parser = argparse.ArgumentParser(description='group file change')
     parser.add_argument('-i', '--input', dest='input', metavar='input', type=str, required=True,
@@ -26,15 +26,16 @@ if __name__ == '__main__':
     order_pro={}
     class_pro={}
     phylum_pro={}
-    with open(GENOME_TXT,"r") as fq:
-        for line in fq:
-            tax = line.strip().split("\t")
-            species = tax[-1]
-            genus_pro[species] = tax[-2]
-            family_pro[species] = tax[-3]
-            order_pro[species] = tax[-4]
-            class_pro[species] = tax[-5]
-            phylum_pro[species] = tax[-6]
+    for val in TAXLIST:
+        with open(val,"r") as fq:
+            for line in fq:
+                tax = line.strip().split("\t")
+                species = tax[-1]
+                genus_pro[species] = tax[-2]
+                family_pro[species] = tax[-3]
+                order_pro[species] = tax[-4]
+                class_pro[species] = tax[-5]
+                phylum_pro[species] = tax[-6]
 
 
 
