@@ -71,11 +71,14 @@ if __name__ == '__main__':
     outputdir = params['outputdir']
     files,_ = GetFileList(inputdir)
     dirs = defaultdict(list)
+    sample_name_list = []
     for value in files:
         if os.path.isdir(value):
             sample_fq,fnlist = GetFileList(value,FlagStr=['fq'])
             dirs[value]=fnlist
-    for value in set(dirs.values()):
+            for fn in fnlist:
+                sample_name_list.append(fn)
+    for value in set(sample_name_list.values()):
         with gzip.open("%s/%s.qz"%(outputdir,value),"wb") as fqout:
             for key,file_value in dirs:
                 if value in file_value:
