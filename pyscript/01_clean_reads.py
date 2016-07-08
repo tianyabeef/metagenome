@@ -7,6 +7,9 @@ import  argparse
 import sys
 import  os
 import gzip
+import time
+from multiprocessing import Process
+from multiprocessing import Pool
 from collections import defaultdict
 
     # def IsSubString(SubStrList,Str)
@@ -65,6 +68,11 @@ def read_params(args):
     args = parser.parse_args()
     params = vars(args)
     return params
+
+def write_gzip(commands):
+    print "subprocess pid:%s" % os.getpid()
+    os.popen(commands)
+
 if __name__ == '__main__':
     params = read_params(sys.argv)
     inputdir = params['inputdir']
@@ -72,19 +80,34 @@ if __name__ == '__main__':
     files,_ = GetFileList(inputdir)
     dirs = defaultdict(list)
     sample_name_list = []
+    starttime = time.time()
+    p=Pool()
     for value in files:
         if os.path.isdir(value):
             sample_fq,fnlist = GetFileList(value,FlagStr=['fq'])
             dirs[value]=fnlist
             for fn in fnlist:
                 sample_name_list.append(fn)
-    for value in set(sample_name_list.values()):
-        with gzip.open("%s/%s.qz"%(outputdir,value),"wb") as fqout:
-            for key,file_value in dirs:
-                if value in file_value:
-                    with open("%s/%s" % (key,value),"r") as fq:
-                        fqout.write(fq)
-
+    print "main pid: %s"%os.getpid()
+    for value in set(sample_name_list):
+        commands = "cat "
+        i=0
+        for key,file_value in dirs.items():
+            if value in file_value:
+                i += 1
+                commands += "%s/%s " % (key,value)
+        if i>1:
+            commands += ">%s/%s\n"%(outputdir,value)
+            commands += "gzip -c %s/%s > %s/%s.gz\n"%(outputdir,value,outputdir,value)
+        else:
+            commands = "gzip -c %s > %s/%s.gz\n"%(commands.replace("cat",""),outputdir,value)
+        print commands
+        p.apply_async(write_gzip,args=(commands,))
+    p.close()
+    p.join()
+    print 'Process end.'
+    endtime = time.time()
+    print "need time %s second"%(endtime-starttime)
 
 
 
