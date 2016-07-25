@@ -99,9 +99,9 @@ if __name__ == '__main__':
         if i>1:
             commands += ">%s/%s\n"%(outputdir,value)
             commands += "gzip -c %s/%s > %s/%s.gz\n"%(outputdir,value,outputdir,value)
+            commands += "rm %s/%s\n"%(outputdir,value)
         else:
             commands = "gzip -c %s > %s/%s.gz\n"%(commands.replace("cat",""),outputdir,value)
-        print commands
         p.apply_async(write_gzip,args=(commands,))
     p.close()
     p.join()
