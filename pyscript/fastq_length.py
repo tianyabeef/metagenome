@@ -15,7 +15,7 @@ def read_params(args):
     parser.add_argument('-o', '--outputdir', dest='outputdir', metavar='outputdir', type=str, required=True,
                         help="out put dir")
     parser.add_argument('-t','--type',dest='type',metavar='type',type=str,required=True,
-                        hel="fastq or fasta")
+                        help="fastq or fasta")
     args = parser.parse_args()
     params = vars(args)
     return params
