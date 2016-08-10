@@ -1,0 +1,67 @@
+{% black pagestart %}
+{% endblock %}
+<h1>三 信息分析结果报告</h1>
+<h2>3.1 数据质控(QC)</h2>
+<h3>3.1.1 原始数据统计</h3>
+<p class="paragraph"><B>分析方法：</B></p>
+<p class="paragraph">通常，每个样品并不是单独测序，而是将多个样品混合在一起，进行平行测序。为了能区分不同样品，每个样品中的序列均引入一段Index标签序列(标示其样本来源信息)。通过Illumina平台(Hiseq)进行Paired-end测序，然后根据Index序列将各个样品的下机数据区分开，提取出的数据以fastq格式进行保存。</p>
+<p class="paragraph">Fastq是Solexa测序技术中一种反映测序序列碱基质量的文件格式。格式如下：
+@FCC4JKKACXX:3:1101:7398:1990#CGTACGAT/1</p>
+<p class="paragraph">NGCAGCCGAACACCACCACCAGACGGTGGGGCTTGTAGGCCCGCAGAGTGGTGAGCAGACTTTCG
++</p>
+<p class="paragraph">BPYacccegfggghfgghffgbcf_gYccggagfhc`gg`fhed[][^b]\TZbZGTXR^GY]_^</p>
+<p class="paragraph">每条read包含4行信息。第一行由’@’开始，代表reads的ID和其他信息(‘#’之后)，#CGTACGAT为index，/1表示这条序列是pair-reads的第一条；第二行为碱基序列，其中N代表无法确定的碱基；第三列以‘+’开头，跟随reads的ID(与’@’后内容相同)，通常省略，但‘+’不能省略；第四列代表reads质量，其中每个字符的ASCII值减去64即为对应碱基的测序质量值，测序质量值(Q)与错误率(e)的关系如下：</p>
+<p class="center">
+    <img class="size2" src="images/3.1rowdata_statistic.png"/>
+</p>
+<p ><B><a href="">结果目录：/00.raw_reads</a></B></p>
+<p ><B>分析结果：</B></p>
+<p class="name_table">表 3-1 原始数据统计</p>
+{% block table1 %}
+{% endblock %}
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Sample：样品名称；</p>
+<p class="tremark">2. Read length：每条read的序列长度；</p>
+<p class="tremark">3. Insert size：插入片段长度；</p>
+<p class="tremark">4. Raw reads：raw reads的序列条数；</p>
+<p class="tremark">5. Raw bases：raw reads的总序列长度。</p>
+<p class="center">
+    <img class="size2" src="images/3.1rowdata_statistic.png"/>
+</p>
+<p class="center">
+    <img class="size2" src="images/3.1rowdata_statistic.png"/>
+</p>
+<p class="name_fig">图 3-1 Reads各位置碱基分布与质量分布。</p>
+<p class="premark">上图中横坐标是reads碱基坐标，纵坐标是碱基比例，不同颜色代表不同碱基。下图中横坐标是reads碱基坐标，纵坐标是碱基质量值，蓝色线表示该位置的平均质量值。</p>
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.1.2 质控(QC)数据统计</h3>
+<p><B>分析方法：</B>原始序列3’端带有adaptor接头序列以及一些少量低质量数据和杂质序列，另外，某些样品宿主污染严重，为了提高后续分析质量和可靠性，需要对原始序列进行去接头、质量剪切和去除宿主DNA污染等。</p>
+<p class="paragraph">具体分析方法为：将有Adaptor接头序列污染的reads截取Adaptor序列部分，过滤长度<50bp的reads；去除包含N碱基数目≥3的reads，对序列3’端进行截切，去掉质量值<20的碱基，并过滤截切后长度<60%原长的reads；如果样品来源于宿主，则尽可能找到宿主的基因组或与宿主亲缘关系较近物种的基因组，通过SOAPaligner比对宿主基因组，将宿主污染的reads剔除<sup>[1]</sup>。</p>
+<p><B><a href="">结果目录：/01.clean_reads</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">质控(QC)数据统计如下表所示：</p>
+<p class="name_table">表 3-2 质控数据统计</p>
+{% black table2 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Sample name：样品名称；</p>
+<p class="tremark">2. Adaptor：接头污染reads的条数占总reads条数的比例；</p>
+<p class="tremark">3. Low quality：低质量reads的条数占总reads条数的比例；</p>
+<p class="tremark">4. Host：宿主污染的reads条数占总reads条数的比例；</p>
+<p class="tremark">5. Clean reads：过滤后的数据中reads 的条数；</p>
+<p class="tremark">6. Clean bases：过滤后的数据中碱基的个数，1G=109；</p>
+<p class="tremark">7. Data use rate：Clean reads与Raw reads的比率。</p>
+{% black pageend %}
+{% endblock %}
+

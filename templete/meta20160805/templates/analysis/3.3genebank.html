@@ -1,0 +1,249 @@
+{% black pagestart %}
+{% endblock %}
+<h2>3.3基因集构建与差异基因分析</h2>
+<h3>3.3.1 序列拼接组装</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">利用基于De-Brujin graph原理的拼接软件SOAPdenovo(version 1.05)[5]采用不同大小的Kmer(51、55、59、63)对过滤后的数据进行组装，在scaffolds内部gaps处，将scaffolds重新打断成新的contigs，并对大于等于500bp的contigs进行统计，从不同Kmer的组装结果中选择N50最大的组装结果<sup>[2]</sup>。</p>
+<p><B><a href="">结果目录：/03.assembly</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">以下是数据的组装注释结果统计表</p>
+<p class="name_table">表 3-13 数据的组装注释结果统计</p>
+{% black table13 %}
+{% black %}
+<p class="tremark">1注：每列详细说明如下</p>
+<p class="tremark">1. Sample name：样品名称。</p>
+<p class="tremark">2. Kmer：最佳的Kmer值。</p>
+<p class="tremark">3. Number of contigs ：所有contigs的序列条数。</p>
+<p class="tremark">4. N50(N90)length：将各contigs序列按长度大小排序，按从大至小的顺序累加序列的长度，当累加值第一次超过所有序列总长度的50%(90%)时，此时累加到的序列，其长度值即为N50(N90)。相比序列平均长度，N50(N90)更能准确表示此次的序列拼接效果。</p>
+<p class="tremark">5. Total length：所有contigs的总序列长度。</p>
+<p class="tremark">6. Maximal length：最长contig的序列长度。</p>
+<p class="tremark">7. Average length：所有contigs的平均序列长度。</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-20 单样品组装结果长度直方图</p>
+<p class="premark">直方图横坐标表示长度区间，纵坐标表示在该区间内的Contigs数目由于长度在10000bp以上的序列长度范围很广，将其缩并在一起</p>
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.3.2 基因预测</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">MetaGeneMark(http://exon.gatech.edu/GeneMark/metagenome/Prediction/，version 2.10)[6]是采用启发式算法的适用于Metagenomes和未知原核生物的基因预测软件。利用软件MetaGeneMark对组装结果进行开放阅读框(ORFs)的预测，然后根据得到的.gff注释文件还原成.fna基因序列文件，并从中筛选出长度大于100bp的基因序列，并翻译成对应的氨基酸序列。</p>
+<p><B><a href="">结果目录：/04.gene_predict</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">以下是基因预测结果统计表</p>
+<p class="name_table">表 3-14 基因预测结果统计</p>
+{% black table14 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Sample name：样品名称。</p>
+<p class="tremark">2. Number of ORFs：所有ORFs的序列条数。</p>
+<p class="tremark">3. Number of complete ORFs：所有完整的ORFs序列条数，即包含起始密码子与终止密码子的ORFs。</p>
+<p class="tremark">4. Total length：所有ORFs的总序列长度。</p>
+<p class="tremark">5. Maximal length：最长ORFs的序列长度。</p>
+<p class="tremark">6. Average length：所有ORFs的平均序列长度。</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-21 单样品基因长度直方图</p>
+<p class="premark">直方图横坐标表示长度区间，纵坐标表示在该区间内的预测出的基因数目由于长度在3000bp以上的基因序列长度范围很广，将其缩并在一起</p>
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.3.3 基因集构建</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">利用CD-HIT(http://www.bioinformatics.org/cd-hit/)[7]将所有预测出来的基因聚类(identity>95%, coverage>90%)，选择每一类中最长的基因序列后去除其余冗余基因，从而构建有关样品的非冗余基因集[8]。(客户可选择另外的基因集作为补充，需提供下载地址，属高级分析内容)。</p>
+<p><B><a href="">结果目录：/05.gene_set</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">下表为基因集数据统计表</p>
+<p class="name_table">表 3-15 基因集结果统计</p>
+{% black table15 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Number of samples：构成基因集所用的样品数。</p>
+<p class="tremark">2. Number of ORFs：所有ORFs的序列条数。</p>
+<p class="tremark">3. Ratio of complete ORFs：所有完整的ORFs序列条数占所有ORFs序列条数的比例。即包含起始密码子与终止密码子的ORFs比例。</p>
+<p class="tremark">4. Total length：所有ORFs的总序列长度。</p>
+<p class="tremark">5. Maximal length：最长ORFs的序列长度。</p>
+<p class="tremark">6. Average length：所有ORFs的平均序列长度。</p>
+<p class="paragraph">下图为基因集构建venn图</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-22 基因集venn图</p>
+<p class="premark">不同颜色的图形代表不同的基因集，如左图中红、绿、紫代表三个的宏基因组基因集重叠部分为其共有基因集</p>
+<p class="paragraph">下图为基因集中基因数目长度分布图</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-23 基因长度直方图</p>
+<p class="premark">直方图横坐标表示长度区间，纵坐标表示在该区间内的预测出的基因数目由于长度在3000bp以上的基因序列长度范围很广，将其缩并在一起</p>
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.3.4 基因丰度表</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">通过SOAPaligner[1]将Clean Reads比对上非冗余基因集，比对参数为-M 4 -r 2 -m 100 -x 1000[2]，根据每个基因被比对上的reads条数与基因的长度，可以计算得到每个基因在样品中的丰度，并汇总成所有样品的基因丰度表。</p>
+<p class="paragraph">此表中每个样品丰度之和均为1，即该丰度为相对丰度。</p>
+<p><B><a href="">结果目录：/06.gene_profile</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">下表为部分基因在部分样品中的丰度表：</p>
+<p class="name_table">表 3-16 部分基因丰度统计</p>
+{% black table16 %}
+{% black %}
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.3.5 CAG 分析(总样品数≥20)(高级分析)</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">对在所有样品中存在的基因，根据丰度一致性，利用canopy算法进行聚类。一般认为聚为一类的基因簇是某一物种的全部或部分基因，我们筛选基因数大于700的基因簇用于后续研究[9]。CAG可以根据其所包含基因的序列信息，通过比对NCBI微生物基因组参考序列可以将CAG注释到属水平甚至种水平。其中有一部分属于未知菌株，无法注释上物种，表格中会注明。</p>
+<p class="paragraph"></p>
+<p><B><a href="">结果目录：/06.gene_profile/00.cag</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">下表为部分CAG物种注释表：</p>
+<p class="paragraph"></p>
+<p class="name_table">表 3-17 部分CAG物种注释结果统计</p>
+{% black table17 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. CAG ID：CAG的编号。</p>
+<p class="tremark">2. Number of genes：CAG包含的基因数目。</p>
+<p class="tremark">3. Taxonomy：注释上的物种名或属名。</p>
+<p class="tremark">4. Level：注释上的物种的层级，例如科(family)，属(genus)，种(species)等。</p>
+<p class="tremark">5. Number of genes on DataBase：CAG中注释上该物种的基因数目。</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="paragraph">图 3.24 各个CAG中基因数目分布图</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-25 某个CAG中基因丰度热图</p>
+<p class="premark">该热图横坐标为不同样品，纵坐标为CAG中的不同基因该CAG中的基因丰度一致性很好，所以会出现自上而下的条带状，这说明CAG中的基因确实来源于同一菌株</p>
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.3.6 基因Anosim分析	(组内样品数≥5)</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">Anosim分析又称为相似性分析，是一种非参数检验，用来检验组间(两组或多组)的差异是否显著大于组内差异，从而判断分组是否有意义。首先利用Bray-Curtis算法计算两两样品间的距离，然后将所有距离从小到大进行排序，并计算R值，之后将样品进行置换，重新计算R*值，R*值大于R的概率即为P值。计算过程由R语言的vegan包实现。</p>
+<p><B><a href="">结果目录：/06.gene_profile/01.anosim</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="name_table">表 3-18 Anosim分析结果统计(Statistics of Anosim)</p>
+{% black table18 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Method name：方法名称；</p>
+<p class="tremark">2. R statistic：Anosim统计值，范围为0-1，R值越接近1表示组间差异越大于组内差异；</p>
+<p class="tremark">3. P-value：统计可信度；</p>
+<p class="tremark">4. Permutation number：置换次数。</p>
+<p class="tremark">如下展示了组间距离与各组内距离的箱线图：</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-26 组间与组内距离箱线图</p>
+<p class="premark">横坐标代表组的类别，纵坐标代表样品之间的距离图中共有N+1个箱线图，N为分组数量，最右边的箱线图指的是分组之间的差异，其他箱线图代表组内差异</p>
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.3.7 基因多样性分析</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">基因在实验组与对照组中可能出现基因个数及丰富度有差异的现象。香农维纳指数与辛普森指数被用来表征微生物基因多样性。香农维纳指数：①种类数目，即丰富度；②种类中个体分配上的平均性(equitability)。种类数目多，可增加多样性；同样，种类之间个体分配的均匀性增加也会使多样性提高。如果每一个体都属于不同的种，多样性指数就最大；如果每一个体都属于同一种，则其多样性指数就最小。辛普森指数：随机取样的两个个体属于不同种的概率，群落中种数越多，各种个体分配越均匀，指数越高，指示群落多样性越好。</p>
+<p class="paragraph">计算公式如下：</p>
+<p class="paragraph">香农维纳指数</p>
+<p class="paragraph">辛普森指数</p>
+<p><B><a href="">结果目录：/06.gene_profile/02.alpha_div</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">下表为各样品的香农维纳指数与辛普森指数统计表：</p>
+<p class="name_table">表 3-19 基因多样性统计</p>
+{% black table19 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Sample name：样品名称。</p>
+<p class="tremark">2. Number of genes：该样品中覆盖到基因集中基因的数目。</p>
+<p class="tremark">3. Shannon-wiener index：根据基因丰度表计算的香农维纳指数。</p>
+<p class="tremark">4. Simpson index：根据基因丰度表计算的辛普森指数。</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-27 不同群体间各样品基因数量的分布图</p>
+<p class="premark">横坐标为样品中基因个数直方图，右边纵坐标代表样品数，左边纵坐标代表密度分布的值</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-28 不同群体间各样品基因多样性指数箱线图</p>
+<p class="premark">横坐标样品名称，纵坐标：左图香农维纳指数；右图为辛普森指数</p>
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.3.8 基因秩和检验差异分析(组内样品数≥5)</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">首先过滤丰度过低的基因，只保留在任意一组中丰度中值>1E-8的基因，然后根据基因的丰度，通过Wilcox rank-sum test秩和检验(也称为Mann-Whitney U test)来计算每个基因在实验组和对照组上的p-value，并用FDR(false discovery rate，错误发现率)方法校正后称为q-value，再根据q-value筛选出在两组间显著差异的基因。一般阈值为q-value≤0.05[2]。其中计算None Hypothesis(即非差异基因比例)由R软件中的q-value包实现。</p>
+<p><B><a href="">结果目录：/06.gene_profile/03.diff_gene</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">如下所示为部分差异基因结果统计表</p>
+<p class="name_table">表 3-20 部分差异基因结果统计</p>
+{% black table20 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Gene ID：基因编号；</p>
+<p class="tremark">2. P-value：秩和检验p-value；</p>
+<p class="tremark">3. Q-value：FDR方法校正后的p-value；</p>
+<p class="tremark">4. Group：该物种富集的组别。</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-29 秩和检验P-values分布图</p>
+<p class="premark">横坐标指实验组和对照组对应的P值，纵坐标分别指：虚线(对应左边坐标)代表非差异基因占所有基因的比例，与蓝线(对应右侧坐标)最高值相同，蓝线即为不同阈值下的错误发现率，即假阳性；红线(对应右侧坐标)即不同阈值下的灵敏度，即真阴性</p>
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.3.9 基因STAMP差异分析(组内样品数≥5)(高级分析)</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">STAMP差异分析用于比较两个或者两组样品质检物种(或功能)的丰度，通过这项分析，可以得到显著性差异物种(或功能)和该物种(或功能)更趋向于何种环境条件下的样品[3]。</p>
+<p><B><a href="">结果目录：/06.gene_profile/04.stamp</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">下表为STAMP筛选出的部分差异基因统计表</p>
+
+<p class="name_table">表 3-21 部分差异基因结果统计</p>
+{% black table21 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Gene ID：基因编号；</p>
+<p class="tremark">2. P-values：STAMP中t检验的p-value；</p>
+<p class="tremark">3. Q-values (corrected)：FDR方法校正后的p-value；</p>
+<p class="tremark">4. Difference between means：平均丰度之差；</p>
+<p class="tremark">5. 95.0% lower CI：95%置信区间的下界；</p>
+<p class="tremark">6. 95.0% upper CI：95%置信区间的上界。</p>
+{% black pageend %}
+{% endblock %}
+
+
+{% black pagestart %}
+{% endblock %}
+<h3>3.3.10 差异基因聚类分析(MGS)(组内样品数≥5，总样品数≥20)(高级分析)</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">对用秩和检验鉴定出的差异基因，通过层次聚类，聚成丰度一致的基因群MGS(metagenomic species)[2]。一般认为，每一个基因群中的基因都是属于同一个属甚至种的。根据鉴定出MGS的丰度，通过R软件的corrplot包绘制MGS之间pearson相关性热图，并通过该热图可以发现MGS之间重要的模式与关系。同时，MGS可以根据其基因序列信息，通过比对NCBI微生物基因组参考序列可以将MGS注释到属水平甚至种水平。其中有一部分属于未知菌株，无法注释上物种，表格中会注明。(如果客户有相关的表征信息，表征数据与MGS的相关性可以分析)</p>
+<p><B><a href="">结果目录：/06.gene_profile/05.mgs</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph"></p>
+<p class="name_table">表 3-22 部分MGS物种注释结果统计</p>
+{% black table22 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. MGS ID：MGS的编号；</p>
+<p class="tremark">2. Number of genes：MGS包含的基因数目；</p>
+<p class="tremark">3. Taxonomy：注释上的物种名或属名；</p>
+<p class="tremark">4. Level：注释上的物种的层级，例如科(family)，属(genus)，种(species)等；</p>
+<p class="tremark">5. Number of genes on Database：MGS中注释上该物种的基因数目；</p>
+<p class="tremark">6. P-value：该MGS平均丰度秩和检验p值；</p>
+<p class="tremark">7. Q-value：FDR校正过的p值。</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-30 MGS丰度热图</p>
+<p class="premark"> 在MGS丰度热图中，横坐标为样品，纵坐标对应每个MGSs中丰度最高的25个基因丰度从高到低的颜色为黑-蓝-红-黄-绿-白右边标注的为每个MGS平均丰度的秩和检验p值</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-31 MGS关系网络图</p>
+<p class="premark">点大小与颜色深浅表示MGS之间的相关性大小，颜色代表spearman相关系数的正负，蓝色表示正相关，红色表示负相关，图中只显示相关检验p值<0.05的结果</p>

@@ -29,7 +29,7 @@ def get_section(config, section):
 
 
 def read_params(args):
-    parser = argparse.ArgumentParser(description=''' ''')
+    parser = argparse.ArgumentParser(description='''output result ''')
     parser.add_argument('--config', dest='config', metavar='FILE', type=str, required=True,
                         help="set the config file")
     args = parser.parse_args()

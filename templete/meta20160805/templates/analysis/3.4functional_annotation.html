@@ -1,0 +1,145 @@
+{% black pagestart %}
+{% endblock %}
+
+<h2>3.4 功能注释分析</h2>
+<h3>3.4.1 基于KEGG数据库功能注释分析</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">KEGG(Kyoto Encyclopedia of Genes and Genomes，京都基因和基因组百科全书，http://www.genome.jp/kegg/)是基因组破译方面的数据库，是一个整合了基因组、化学和系统功能信息的数据库[10]。各个数据库中包含了大量的有用信息：基因组信息存储在GENES数据库里，包括完整和部分测序的基因组序列；更高级的功能信息存储在PATHWAY数据库里，包括图解的细胞生化过程如代谢、膜转运、信号传递、细胞周期，还包括同系保守的子通路等信息。与其他数据库相比，KEGG的一个显著特点就是具有强大的图形功能，它利用图形而不是文字来介绍众多的代谢途径以及各途径之间的关系，这样可以使研究者能够对其所要研究的代谢途径有一个直观全面的了解，KEGG 数据库中丰富的通路信息将有助于我们从系统水平去了解基因的生物学功能。</p>
+<p><B>分析方法：</B></p>
+<p class="paragraph">运用 BLAST(BLAST Version 2.2.28+，http://blast.ncbi.nlm.nih.gov/Blast.cgi)将基因集与 KEGG 的基因数据库(GENES)进行比对，然后进行后续分析。并根据KEGG数据库得到的KO注释信息，累加对应的基因丰度，得到KO丰度表。</p>
+<p><B><a href="">结果目录：/07.kegg/00.geneset</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">下表为部分Gene关于KEGG数据库的注释结果：</p>
+<p class="name_table">表3-23 基因集部分基因KEGG注释结果</p><p class="name_table"></p>
+{% black table23 %}
+{% black %}
+
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Gene ID：基因序列名称；</p>
+<p class="tremark">2. Entry：基因注释到的KEGG数据库中基因编号；</p>
+<p class="tremark">3. Gene name：基因注释到的基因名称；</p>
+<p class="tremark">4. Definition：基因的具体功能注释与定义。</p>
+<p class="tremark">5. KO：基因在KEGG数据库中的KO编号。</p>
+<p class="paragraph">下表为KEGG功能KO丰度表：</p>
+<p class="name_table">表3-24 部分KO丰度统计</p><p class="name_table"></p>
+{% black table24 %}
+{% black %}
+
+<p class="paragraph">下图为各类功能在基因集中数目与比例统计图：</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-32基因集的KEGG注释结果分类统计</p>
+<p class="premark">纵坐标为KEGG代谢通路的名称，横坐标为注释到该通路下的基因个数及其个数占被注释上的基因总数的比例</p>
+
+<h3>3.4.2 基于KEGG数据库差异基因分析(组内样品数≥5)</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">将秩和检验筛选出的差异基因，进行KEGG注释，并标注到KEGG通路中，可以直观地显示差异基因在通路中的作用。</p>
+<p><B><a href="">结果目录：/07.kegg/01.diff_gene</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">下表为部分差异基因对应的功能注释结果：</p>
+<p class="name_table">表3-25 部分差异基因KEGG注释结果</p><p class="name_table"></p>
+{% black table25 %}
+{% black %}
+
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Gene ID：基因序列名称；</p>
+<p class="tremark">2. Entry：基因注释到的 KO 编号；</p>
+<p class="tremark">3. Category1：KEGG pathway 的第一级分类；</p>
+<p class="tremark">4. Category2：KEGG pathway 的第二级分类；</p>
+<p class="tremark">5. Description：KO的具体功能注释。</p>
+<p class="paragraph">下图为差异基因在KEGG各类别中的比例分布图</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-33 KEGG各类别差异基因分布比例统计图</p>
+<p class="premark"> 横坐标表示KEGG代谢通路的名称，纵坐标表示实验(对照)组在某功能上差异富集的KO占实验(对照)组所有富集基因的比例</p>
+<p class="paragraph">下图为差异基因富集的某KEGG通路图</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-34 KEGG富集pathway</p>
+<p class="premark">长方形节点表示基因产物(如酶类)，绿色方框表示上调KO，即实验组相对对照组显著富集的KO；红色为下调KO，即对照组相对实验组显著富集的KO实现箭头的方向表示酶促反应进行的方向，虚线箭头表示此产物可通过中间产物与其他代谢途径发生关系</p>
+<h3>3.4.3 基于KEGG数据库的差异功能分析(组内样品数≥5)</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">根据KO丰度表，通过秩和检验计算KO在两组之间的差异p-值，并用FDR校正后得到q-值，根据q-值<0.05筛选在实验组与对照组间有显著差异表达的KO。根据KO的分类，可以得到每个类别中差异KO占所有差异KO的比例。</p>
+<p class="paragraph">同时，根据KO的秩和检验统计量，可以累加计算得到对应的module与pathway的差异检验统计量，并筛选出差异表达的差异module与差异pathway。</p>
+<p><B><a href="">结果目录：/07.kegg/02.diff_ko</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="name_table">表3-26 部分差异KO结果统计</p><p class="name_table"></p>
+{% black table26 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">KO ID：KO编号。</p>
+<p class="tremark">P-value：秩和检验p-value。</p>
+<p class="tremark">Q-value：FDR方法校正后的p-value。</p>
+<p class="tremark">Group：该KO富集的组别。</p>
+<p class="tremark">Descripition：该KO的功能描述。</p>
+<p class="name_table">表3-27 部分差异Module结果统计</p><p class="name_table"></p>
+{% black table27 %}
+{% black %}
+
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">Module ID：KEGG模块编号；</p>
+<p class="tremark">P-value：秩和检验p-value；</p>
+<p class="tremark">Q-value：FDR方法校正后的p-value；</p>
+<p class="tremark">Group：该Module富集的组别；</p>
+<p class="tremark">Descripition：该Module的功能描述。</p>
+<p class="name_table">表3-28 部分差异pathway结果统计</p><p class="name_table"></p>
+{% black table28 %}
+{% black %}
+
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">Pathway ID：KEGG通路编号；</p>
+<p class="tremark">P-value：秩和检验p-value；</p>
+<p class="tremark">Q-value：FDR方法校正后的p-value；</p>
+<p class="tremark">Group：该通路富集的组别；</p>
+<p class="tremark">Descripition：该通路的功能描述。</p>
+
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-35 KEGG各类别差异KO分布比例统计图</p>
+<p class="premark"> 横坐标表示KEGG代谢通路的名称，纵坐标表示实验(对照)组在某功能上差异富集的KO占实验(对照)组所有富集基因的比例</p>
+
+<h3>3.4.4 基于eggNOG数据库功能注释分析</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">EggNOG(evolutionary genealogy of genes: Non-supervised Orthologous Groups)数据库是利用Smith–Waterman比对算法对构建的基因直系同源簇(Orthologous Groups)及其功能注释[11]。通过基因序列与eggNOG数据库进行比对，统计NOG功能在各个样品中的丰度。</p>
+<p><B><a href="">结果目录：/08.eggnog</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">下表为基因集中各部分基因序列比对eggNOG数据库得到的注释结果：</p>
+<p class="name_table">表3-29 部分基因eggNOG注释结果</p><p class="name_table"></p>
+{% black table29 %}
+{% black %}
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Gene ID：基因序列名称；</p>
+<p class="tremark">2. Protein name：基因注释到的蛋白名称；</p>
+<p class="tremark">3. NOG name：基因注释到的NOG编号；</p>
+<p class="tremark">4. Description：eggNOG分类具体功能注释；</p>
+<p class="tremark">5. Category：eggNOG的分类。</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-36 每个群体的eggNOG注释结果分类统计</p>
+<p class="premark">横坐标为每个群体注释上的eggNOG通路，纵坐标为基因占该通路的比例</p>
+<h3>3.4.5 基于CAZy碳水化合物活性酶数据库功能注释分析(高级分析)</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">CAZy全称为Carbohydrate-Active enZYmes Database，碳水化合物酶相关的专业数据 库，内容包括能催化碳水化合物降解、修饰、以及生物合成的相关酶系家族[12]。其包含四个主要分类：糖苷水解酶(GHs)、糖基转移酶(GTs)、 多糖裂解酶(PLs)和糖类酯解酶(CEs)。此外，还包含与碳水化合物结合结构域(CBMs)。碳水化合物活性酶(CAZyme)对地球上所有碳水化合物的合成、降解与修饰起重要作用，因此深入研究 CAZyme，对于了解微生物碳水化合物的代谢机制非常重要。将基因序列与CAZy数据库进行比对分析，能够得到碳水化合物活性酶类的物种来源，酶功能EC分类，基因、蛋白序列及蛋白结构的信息。</p>
+<p><B><a href="">结果目录：/08.cazy</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="paragraph">下表为基因集中各部分基因序列比对CAZy数据库得到的注释结果：</p>
+<p class="name_table">表3-30 部分基因CAZy注释结果</p><p class="name_table"></p>
+{% black table30 %}
+{% black %}
+<p class="paragraph"></p>
+<p class="tremark">注：每列详细说明如下</p>
+<p class="tremark">1. Gene ID：基因序列名称；</p>
+<p class="tremark">2. Category：基因注释到的CAZy分类；</p>
+<p class="tremark">3. Description：具体CAZy功能注释。</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-37 CAZy各分类中基因数目柱状图</p>
+<p class="premark">横坐标为碳水化合物活性酶分类，纵坐标为相应酶分类的基因数目</p>
+<h3>3.4.6 基于ARDB耐药基因数据库功能注释分析(高级分析)</h3>
+<p><B>分析方法：</B></p>
+<p class="paragraph">为了便于识别抗生素耐药基因和特征，马里兰大学帕克学院建立了一个手工辅助数据库ARDB(Antibiotic Resistance Genes Database，耐药基因数据库，http://ardb.cbcb.umd.edu/)——统一公开耐药基因和相关信息。ARDB允许用户从基因类型、生物体、抗生素视图浏览和搜索耐药性的信息[13]。BLAST和RPS-BLAST工具将帮助用户识别注释新的潜在耐药基因。目前，ARDB 数据库包括了13293个耐药基因信息，有377种类型，257种抗生素，3369个种，124个属。我们运用BLAT将基因集中的基因序列与ARDB数据库进行比对，获得抗生素抗性基因的种类、数量及其功能信息。</p>
+<p><B><a href="">结果目录：/08.ardb</a></B></p>
+<p><B>分析结果：</B></p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-38 耐药基因各分类的分布图</p>
+<p class="premark">横坐标为不同的分组，纵坐标为耐药基因的相对丰度不同颜色代表注释到ARDB上的不同耐受基因分类，色块的高度代表对应的平均丰度</p>
+<p class="center"><img class="size2" src="images/3.1rowdata_statistic.png"/></p>
+<p class="name_fig">图 3-39 不同群体间耐药基因丰度差异(需分组信息)</p>
+<p class="premark"> 横坐标代表不同群体样本(图中表示健康组和病人组)，纵坐标代表耐药基因的丰度散点图大致表示每组样品丰度的分布情况</p>
+
+<p class="name_fig">图 3-40 不同群体间耐药基因top10箱线图</p>
+<p class="premark"> 横坐标代表不同的耐药基因，纵坐标代表健康组与病人组的耐药基因相对丰度不用颜色代表不同分组，如果两组存在耐药基因在两组中均为前10，则会在柱上方标明组间秩和检验的p值，p值越小，代表差异越显著</p>
