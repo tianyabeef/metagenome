@@ -4,6 +4,11 @@ __author__ = "huangy"
 __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
 
+
+from __future__ import division
+import re
+from string import Template
+from collections import OrderedDict
 import os
 def mkdir(path):
     if not os.path.exists(path):
@@ -29,3 +34,49 @@ def get_name(path):
     filename = os.path.splitext(basename)[0]
     suffix = os.path.splitext(basename)[1]
     return dirname,filename,suffix
+def parse_group_file(file):
+    if file is None:
+        return None
+    group = OrderedDict()
+    with open(file) as g:
+        for line in g:
+            tabs = line.strip().split('\t')
+            if len(tabs) >= 2:
+                group[tabs[0]] = tabs[1]
+            else:
+                group[tabs[0]] = tabs[0]
+    return group
+
+
+
+
+class MyTemplate(Template):
+    delimiter = '@#'
+
+
+class Rparser(object):
+    def __init__(self):
+        self.template = None
+        self.R_script = None
+        self.file = None
+
+    def open(self, template):
+        fp = open(template)
+        template = fp.read()
+        fp.close()
+        self.template = MyTemplate(template)
+
+    def format(self, var):
+        self.R_script = self.template.safe_substitute(var)
+
+    def write(self, outfile):
+        fp = open(outfile, 'w')
+        fp.write(self.R_script)
+        self.file = outfile
+        fp.close()
+
+    def run(self):
+        os.system('R CMD BATCH --slave %(Rfile)s %(Rfile)sout' % {'Rfile': self.file})
+
+def image_trans(num,input,output):
+    os.system('convert -density %s %s %s' % (num,input,output))

@@ -1,38 +1,77 @@
-source("/data_center_01/pipeline/huangy/metagenome/Rscript/labels2colors.R")
-library("grid");
-library("VennDiagram");
-args <- commandArgs("T")
-print(args)
-data <- read.table(args[1], header = T, check.names = F,quote="",row.names=1,sep="\t")
-group <- read.table(args[2],header=F,check.names=F,quote="",row.names=1,sep="\t")
-data = data[,rownames(group)]
-color_list = group2corlor(group)
-sample_colors = color_list[[1]]
-group_colors = color_list[[2]]
-group_names = color_list[[3]]
-group = color_list[[4]]
+source('/data_center_01/pipeline/16S_ITS_pipeline_v3.0/src/template/labels2colors.R')
+library(VennDiagram)
+library(grid)
+X = read.table("@#{for_plot}",sep='\t',row.names=1,header=F,check.names=F,quote="")
+group=read.table("@#{group_file}",header=F,row.names=1,check.names=F,quote="")
 
-  
-rnames = rownames(data)
-#print(class(data))
-#data = as.data.frame(data)
-#print(class(data))
-numberlist = as.list(data)
-modifylist <-function(list){
-  numberlistnames = names(list)
-  newlist = list()
-  for (i in numberlistnames){
-    newlist[[i]] = rnames[which(list[[i]] > 0)]
-  }
-  newlist
+g = c()
+for(i in 1:nrow(X)){
+	a = X[i,]
+	a = as.vector(a)
+	a = strsplit(a,' ')
+	g = c(g,a)
 }
-  
-newlist = modifylist(numberlist)
-#profile[which(profile > 0)]  <- 1
-#f <- function(x, y){
-#  y[which(x != 0)]
-#}
-#list.venn <- lapply(profile, f, y = rownames(profile))
-#col = c("red", "yellow", "green", "blue", "purple", "orange")
-i = ncol(data)
-venn.diagram(newlist, imagetype = "png", fill = group_colors, paste("venn", i, "png", sep = "."), margin = 0.05);
+gnum = nrow(X)
+colors=labels2colors(group[,1])
+g1=unique(group)
+g_order=g1[order(g1),1]
+gcols=unique(colors)
+gcols_order=gcols[order(g1)]
+A=as.character(g_order)
+tmp = cbind(A,gcols_order)
+rownames(tmp)=A
+
+if(gnum==2){
+	group_name = c('@#{group_name1}','@#{group_name2}')
+        gcols_order_finaly =tmp[group_name,2]
+	venn.plot <- venn.diagram(
+		x = list('@#{group_name1}'=g[1][[1]],'@#{group_name2}'=g[2][[1]]),
+		filename = "@#{tiff_file}",
+		col = "black",
+		fill = gcols_order_finaly,
+		cat.col = gcols_order_finaly,
+		cat.cex = 1.5,
+		cat.fontface = "bold",
+		margin = 0.14
+	)
+}else if(gnum==3){
+	group_name = c('@#{group_name1}','@#{group_name2}','@#{group_name3}')
+        gcols_order_finaly =tmp[group_name,2]	
+	venn.plot <- venn.diagram(
+		x = list('@#{group_name1}'=g[1][[1]],'@#{group_name2}'=g[2][[1]],'@#{group_name3}'=g[3][[1]]),
+		filename = "@#{tiff_file}",
+		col = "black",
+		fill = gcols_order_finaly,
+		cat.col = gcols_order_finaly,
+		cat.cex = 1.5,
+		cat.fontface = "bold",
+		margin = 0.14
+	)	
+}else if(gnum==4){
+	group_name = c('@#{group_name1}','@#{group_name2}','@#{group_name3}','@#{group_name4}')
+        gcols_order_finaly =tmp[group_name,2]
+	venn.plot <- venn.diagram(
+		x = list('@#{group_name1}'=g[1][[1]],'@#{group_name2}'=g[2][[1]],'@#{group_name3}'=g[3][[1]],'@#{group_name4}'=g[4][[1]]),
+		filename = "@#{tiff_file}",
+		col = "black",
+		fill = gcols_order_finaly,
+		cat.col = gcols_order_finaly,
+		cat.cex = 1.5,
+		cat.fontface = "bold",
+		margin = 0.14
+	)	
+}else if(gnum==5){
+	group_name = c('@#{group_name1}','@#{group_name2}','@#{group_name3}','@#{group_name4}','@#{group_name5}')
+	gcols_order_finaly =tmp[group_name,2] 	
+	venn.plot <- venn.diagram(
+		x = list('@#{group_name1}'=g[1][[1]],'@#{group_name2}'=g[2][[1]],'@#{group_name3}'=g[3][[1]],'@#{group_name4}'=g[4][[1]],'@#{group_name5}'=g[5][[1]]),
+		filename = "@#{tiff_file}",
+		col = "black",
+		fill = gcols_order_finaly,
+		cat.col = gcols_order_finaly,
+		cex = c(1.5, 1.5, 1.5, 1.5, 1.5, 1, 0.8, 1, 0.8, 1, 0.8, 1, 0.8,1, 0.8, 1, 0.55, 1, 0.55, 1, 0.55, 1, 0.55, 1, 0.55, 1, 1, 1, 1, 1, 1.5),
+		cat.cex = 1.5,
+		cat.fontface = "bold",
+		margin = 0.14
+	)	
+}

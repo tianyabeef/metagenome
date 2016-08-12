@@ -7,10 +7,12 @@ import  os
 import re
 from  ConfigParser import ConfigParser
 from workflow.util.useful import mkdir,parse_group,get_name
+from workflow.util import globals
 
 def taxon(config,sh_default_file,outpath,name):
     commands = []
     work_dir = os.path.dirname(config)
+    pyscript_dir = globals.PYscript
     commands.append("## calculate abundance")
     commands.append("/data_center_01/pipeline/huangy/metagenome/perlscript/02_speciesabundance clean_reads_list bacteria,fungi,archaea,virus")
     commands.append("nohup /data_center_03/USER/zhongwd/bin/qsge --queue all.q --resource vf=15G --maxjob 10 --jobprefix MA --lines 1 --getmem shell_alignment/match.sh &")
@@ -35,20 +37,23 @@ def taxon(config,sh_default_file,outpath,name):
     config_gene.read(config)
     group = re.split("\s+|\t",config_gene.get("param","group"))
     mkdir("%s/group/" % work_dir)
+    commands.append("## 00.piechart     need finish")
+    mkdir("%s/group/00.piechart"%(work_dir))
+    commands.append("ls alignment/*/*species.abundance | sed 's/alignment\/\(.*\)\/.*species.abundance/\\1/g' | while read a ; do perl /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/test/pieplot/pie.pl < alignment/$a/$a.species.abundance > 00.piechart/$a.species.pie.svg;done")
+    commands.append("ls alignment/*/*genus.abundance   | sed 's/alignment\/\(.*\)\/.*genus.abundance/\\1/g'   | while read a ; do perl /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/test/pieplot/pie.pl < alignment/$a/$a.genus.abundance   > 00.piechart/$a.genus.pie.svg;done")
     for subgroup in group:
         dirname,subgroup_name,_ = get_name(subgroup)
         _,min_sample_num_in_groups,sample_num_total,group_num=parse_group(subgroup)
-        commands.append("## 00.piechart     need finish")
-        mkdir("%s/group/%s/00.piechart"%(work_dir,subgroup_name))
-        commands.append("ls alignment/*/*species.abundance | sed 's/alignment\/\(.*\)\/.*species.abundance/\1/g' | while read a ; do perl /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/test/pieplot/pie.pl < alignment/$a/$a.species.abundance > 00.piechart/$a.species.pie.svg;done")
-        commands.append("ls alignment/*/*genus.abundance   | sed 's/alignment\/\(.*\)\/.*genus.abundance/\1/g'   | while read a ; do perl /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/test/pieplot/pie.pl < alignment/$a/$a.genus.abundance   > 00.piechart/$a.genus.pie.svg;done")
+        mkdir("%s/group/%s"%(work_dir,subgroup_name))
         commands.append("## 01.barplot      need finish")
         mkdir("%s/group/%s/01.barplot"%(work_dir,subgroup_name))
-        commands.append("cd 01.barplot; Rscript /data_center_01/pipeline/huangy/metagenome/Rscript/02_barplot_species.r; cd -")
-        commands.append("cd 01.barplot; Rscript /data_center_01/pipeline/huangy/metagenome/Rscript/02_barplot_genus.r;   cd -")
+        commands.append("%s -i %s/profile/species.profile -o %s/%s/01.barplot/species.pdf \
+        -g %s -t %s"%(pyscript_dir,work_dir,work_dir,subgroup_name,subgroup,"species"))
+        commands.append("%s -i %s/profile/genus.profile -o %s/%s/01.barplot/genus.pdf \
+        -g %s -t %s"%(pyscript_dir,work_dir,work_dir,subgroup_name,subgroup,"genus"))
         commands.append("## 02.core")
         mkdir("%s/group/%s/02.core"%(work_dir,subgroup_name))
-        commands.append("perl /data_center_06/Project/pracrice/yehaocheng_20160120/02.taxon_group1/bin/core_sum.pl clean_reads_list profile/species.profile > 02.core/core.profile")
+        commands.append("%s"%(pyscript_dir))
         commands.append("cd 02.core; Rscript /data_center_01/pipeline/huangy/metagenome/Rscript/02_venn.R core.profile ; cd -")
         commands.append("perl /data_center_03/USER/zhongwd/rd/06_R2svg/flower/flower.pl profile/species.profile > 02.core/species.flower.svg")
         commands.append("cd 02.core; Rscript /data_center_04/Projects/pichongbingdu/pair_reads/02.taxon/core/venn.r ../profile/species.profile; cd -")
@@ -60,7 +65,7 @@ def taxon(config,sh_default_file,outpath,name):
         commands.append("perl /data_center_03/USER/zhongwd/rd/Finish/07_acumm_share_curve/Accumulated_Shared_Curve.pl -p 03.accum_share/species.profile -c species -t 100")
         commands.append("## 04.rarecurve")
         mkdir("%s/group/%s/04.rarecurve"%(work_dir,subgroup_name))
-        commands.append("list alignment/*/*MATCH > 04.rarecurve/match.list; sed 's/.*alignment\/\(.*\)\/.*MATCH/\1/g' 04.rarecurve/match.list | paste - 04.rarecurve/match.list > 04.rarecurve/match.list.tmp; mv -f 04.rarecurve/match.list.tmp 04.rarecurve/match.list")
+        commands.append("list alignment/*/*MATCH > 04.rarecurve/match.list; sed 's/.*alignment\/\(.*\)\/.*MATCH/\\1/g' 04.rarecurve/match.list | paste - 04.rarecurve/match.list > 04.rarecurve/match.list.tmp; mv -f 04.rarecurve/match.list.tmp 04.rarecurve/match.list")
         commands.append("nohup perl /data_center_03/USER/zhongwd/rd/05_rarecurve/RareCurve/RareCurve.pl -s clean_reads_list -m 04.rarecurve/match.list -d 04.rarecurve &")
         commands.append("## 06.ternaryplot")
         mkdir("%s/group/%s/06.ternaryplot"%(work_dir,subgroup_name))
@@ -86,4 +91,4 @@ def taxon(config,sh_default_file,outpath,name):
         commands.append("cd group/%s/11-14.beta_div/genus; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/genus.profile -g %s -m bray -r; cd -"%(subgroup_name,subgroup))
         mkdir("%s/group/%s/15.LEfSe"%(work_dir,subgroup_name))
         commands.append("/data_center_01/pipeline/16S_ITS_pipeline_v3.0/script/05_LEfSe.py -i profile/species.profile -l /data_center_03/USER/huangy/soft/LEfSe_lzb -g %s -o group/%s/15.LEfSe/ --LDA 2"%(subgroup,subgroup_name))
-        return commands
+    return commands
