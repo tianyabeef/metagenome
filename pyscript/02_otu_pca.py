@@ -3,7 +3,7 @@
 
 from __future__ import division
 import sys
-import re
+sys.path.append('/data_center_01/pipeline/huangy/metagenome/')
 import argparse
 from workflow.util.globals import const
 from workflow.util.useful import parse_group_file,mkdir,Rparser,get_name,image_trans
@@ -41,14 +41,14 @@ if __name__ == '__main__':
     r_job = Rparser()
     if params['two_legend']:
         if params['with_boxplot']:
-            r_job.open(const.Rscript + '/03_tax_pca_two.Rtp')
+            r_job.open(const.Rscript + '/02_tax_pca_two.R')
         else:
-            r_job.open(const.Rscript + '/03_tax_pca_two.Rtp')
+            r_job.open(const.Rscript + '/02_tax_pca_two.R')
     else:
         if params['with_boxplot']:
-            r_job.open(const.Rscript + '/03_tax_pca_with_boxplot.Rtp')
+            r_job.open(const.Rscript + '/02_tax_pca_with_boxplot.R')
         else:
-            r_job.open(const.Rscript + '/03_tax_pca.Rtp')
+            r_job.open(const.Rscript + '/02_tax_pca.R')
     r_job.format(vars)
     r_job.write(params['out_dir'] + '/tax_pca.R')
     r_job.run()

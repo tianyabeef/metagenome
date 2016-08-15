@@ -6,10 +6,9 @@ __version__ = "1.0.0-dev"
 
 import argparse
 import sys
+sys.path.append('/data_center_01/pipeline/huangy/metagenome/')
 from workflow.util.globals import const
 from workflow.util.useful import parse_group_file,mkdir,Rparser,get_name,image_trans
-from collections import OrderedDict
-import pandas as pd
 
 def read_params(args):
     parser = argparse.ArgumentParser(description='group file change')
@@ -39,4 +38,4 @@ if __name__ == '__main__':
     r_job.format(vars)
     r_job.write(outputdir+ '/top.R')
     r_job.run()
-    image_trans(pdfoutput, pngoutput)
+    image_trans(300,pdfoutput, pngoutput)

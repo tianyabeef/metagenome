@@ -8,6 +8,7 @@ __version__ = "1.0.0-dev"
 
 import sys
 import os
+sys.path.append('/data_center_01/pipeline/huangy/metagenome/')
 import argparse
 from workflow.util.globals import const
 from workflow.util.useful import parse_group_file,mkdir,Rparser,get_name,image_trans
@@ -48,7 +49,7 @@ if __name__ == '__main__':
     mkdir(os.path.split(outputfile)[0])
     RscriptDir = const.Rscript
     r_job = Rparser()
-    r_job.open("%s/02_bar_plot.Rtp"%RscriptDir)
+    r_job.open("%s/02_barplot.R"%RscriptDir)
     vars = {"top":top,
             "infile": inputfile,
             "pdf_file": outputfile,

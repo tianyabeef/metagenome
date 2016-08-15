@@ -36,14 +36,14 @@ def taxon(config,sh_default_file,outpath,name):
     config_gene = ConfigParser()
     config_gene.read(config)
     group = re.split("\s+|\t",config_gene.get("param","group"))
-    mkdir("%s/group/" % work_dir)
+    mkdir("%s/" % work_dir)
     commands.append("## 00.piechart     need finish")
     mkdir("%s/group/00.piechart"%(work_dir))
     commands.append("ls alignment/*/*species.abundance | sed 's/alignment\/\(.*\)\/.*species.abundance/\\1/g' | while read a ; do perl /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/test/pieplot/pie.pl < alignment/$a/$a.species.abundance > 00.piechart/$a.species.pie.svg;done")
     commands.append("ls alignment/*/*genus.abundance   | sed 's/alignment\/\(.*\)\/.*genus.abundance/\\1/g'   | while read a ; do perl /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/test/pieplot/pie.pl < alignment/$a/$a.genus.abundance   > 00.piechart/$a.genus.pie.svg;done")
 
     commands.append("## 03.accum")
-    mkdir("%s/group/%s/03.accum_share"%(work_dir))
+    mkdir("%s/03.accum_share"%(work_dir))
     commands.append("ln -s ../profile/genus.profile 03.accum_share")
     commands.append("ln -s ../profile/species.profile 03.accum_share")
     commands.append("perl /data_center_03/USER/zhongwd/rd/Finish/07_acumm_share_curve/Accumulated_Shared_Curve.pl -p 03.accum_share/genus.profile -c genus -t 100")
@@ -72,15 +72,16 @@ def taxon(config,sh_default_file,outpath,name):
         mkdir("%s/group/%s"%(work_dir,subgroup_name))
         commands.append("## 01.barplot      need finish")
         mkdir("%s/group/%s/01.barplot"%(work_dir,subgroup_name))
-        commands.append("%s/02_bar_plot.py -i %s/profile/species.profile -o %s/%s/01.barplot/species.pdf \
+        commands.append("%s/02_bar_plot.py -i %s/profile/species.profile -o %s/group/%s/01.barplot/species.pdf \
         -g %s -t %s"%(pyscript_dir,work_dir,work_dir,subgroup_name,subgroup,"species"))
-        commands.append("%s/02_bar_plot.py -i %s/profile/genus.profile -o %s/%s/01.barplot/genus.pdf \
+        commands.append("%s/02_bar_plot.py -i %s/profile/genus.profile -o %s/%s/group/01.barplot/genus.pdf \
         -g %s -t %s"%(pyscript_dir,work_dir,work_dir,subgroup_name,subgroup,"genus"))
         commands.append("## 02.core")
         mkdir("%s/group/%s/02.core"%(work_dir,subgroup_name))
-        commands.append("%s"%(pyscript_dir))
-        commands.append("%s/02_venn.py -i %s/profile/species.profile -o %s/group/%s/02.core/%s/ -g %s "%(pyscript_dir,work_dir,work_dir,subgroup,"species"))
-        commands.append("%s/02_venn.py -i %s/profile/species.profile -o %s/group/%s/02.core/%s/ -g %s "%(pyscript_dir,work_dir,work_dir,subgroup,"genus"))
+        commands.append("%s/02_venn.py -i %s/profile/species.profile -o %s/group/%s/02.core/%s/ -g %s "\
+                        %(pyscript_dir,work_dir,work_dir,subgroup_name,"species",subgroup))
+        commands.append("%s/02_venn.py -i %s/profile/species.profile -o %s/group/%s/02.core/%s/ -g %s "\
+                        %(pyscript_dir,work_dir,work_dir,subgroup_name,"genus",subgroup))
         commands.append("## 05.top_boxplot")
         mkdir("%s/group/%s/05.top_boxplot"%(work_dir,subgroup_name))
         commands.append("cut -f 1 profile/genus.profile   | perl /data_center_03/USER/zhongwd/temp/0106/top/a.pl > 05.top_boxplot/genus.phylum")

@@ -1,15 +1,24 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- #
+from __future__ import division
 __author__ = "huangy"
 __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
 
 
-from __future__ import division
+
 import re
 from string import Template
 from collections import OrderedDict
 import os
+import pandas as pd
+
+
+def cutcol_dataFrame(data,group):
+    data = pd.DataFrame.from_csv(data,sep="\t")
+    samples = parse_group_file(group).keys()
+    data.to_csv()
+    return data.loc[:samples],samples
 def mkdir(path):
     if not os.path.exists(path):
         os.mkdir(path)
@@ -30,7 +39,7 @@ def parse_group(group_file):
     return sample_num_in_groups, min_sample_num_in_groups, sample_num_total, group_num
 def get_name(path):
     basename = os.path.basename(path)
-    dirname = os.path.split(path)
+    dirname = os.path.split(path)[0]
     filename = os.path.splitext(basename)[0]
     suffix = os.path.splitext(basename)[1]
     return dirname,filename,suffix
