@@ -1,9 +1,9 @@
-species.profile <- read.table("../profile/species.profile", head = T, check.names = F,quote="",row.names=1,sep="\t")
-genus.profile   <- read.table("../profile/genus.profile",   head = T, check.names = F,quote="",row.names=1,sep="\t")
-phylum.profile  <- read.table("../profile/phylum.profile",  head = T, check.names = F,quote="",row.names=1,sep="\t")
-species.phylum  <- read.table("species.phylum",     head = F, check.names = F, row.names = 1,quote="",sep="\t")
-genus.phylum    <- read.table("genus.phylum",       head = F, check.names = F, row.names = 1,quote="",sep="\t")
-group.list      <- read.table("../../group/group1.txt",      head = F, check.names = F, row.names = 1,quote="",sep="\t")
+species.profile <- read.table("../profile/species.profile", head = T, check.names = F)
+genus.profile   <- read.table("../profile/genus.profile",   head = T, check.names = F)
+phylum.profile  <- read.table("../profile/phylum.profile",  head = T, check.names = F)
+species.phylum  <- read.table("species.phylum",     head = F, check.names = F, row.names = 1)
+genus.phylum    <- read.table("genus.phylum",       head = F, check.names = F, row.names = 1)
+group.list      <- read.table(@#{group},head = F, check.names = F, row.names = 1)
 
 topplot <- function(species.profile, genus.profile, phylum.profile, species.phylum, genus.phylum, pdf.file){
   species.profile <- species.profile[rev(order(apply(species.profile, 1, median)))[1 : 20], ]
@@ -15,7 +15,7 @@ topplot <- function(species.profile, genus.profile, phylum.profile, species.phyl
   names(color.phylum) = rownames(phylum.profile)
   species.phylum <- as.vector(species.phylum[rownames(species.profile), 1])
   species.phylum[-which(species.phylum %in% rownames(phylum.profile))] = "Others"
-#  cat(colnames(phylum.profile))
+  #  cat(colnames(phylum.profile))
   color.species <- color.phylum[species.phylum]
   genus.phylum <- as.vector(genus.phylum[rownames(genus.profile), 1])
   genus.phylum[-which(genus.phylum %in% rownames(phylum.profile))] = "Others"
@@ -44,11 +44,11 @@ topplot <- function(species.profile, genus.profile, phylum.profile, species.phyl
   dev.off()
 }
 
-topplot(species.profile, genus.profile, phylum.profile, species.phylum, genus.phylum, pdf.file = "top.all.pdf")
+topplot(species.profile, genus.profile, phylum.profile, species.phylum, genus.phylum, pdf.file = @#{pdfoutput})
 for (grp in levels(group.list[, 1])){
   samples <- rownames(group.list)[which(group.list[, 1] == grp)]
   species.profile.grp <- species.profile[, samples]
-#cat(rownames(species.profile.grp))
+  #cat(rownames(species.profile.grp))
   genus.profile.grp   <- genus.profile[, samples]
   phylum.profile.grp  <- phylum.profile[, samples]
   topplot(species.profile.grp, genus.profile.grp, phylum.profile.grp, species.phylum, genus.phylum, pdf.file = paste("top", grp, "pdf", sep = "."))
