@@ -7,15 +7,15 @@ __version__ = "1.0.0-dev"
 
 import os
 import sys
-import workflow.util.globals as glo
+from workflow.util.globals import const
 from ConfigParser import ConfigParser
 from workflow.control import touch_sh_file
 
 
-config_file_suffix = glo.const.config_file_suffix
-shell_file_suffix = glo.const.shell_file_suffix
-config_default_dir = glo.const.config_default_dir
-sh_default_dir = glo.const.sh_default_dir
+config_file_suffix = const.config_file_suffix
+shell_file_suffix = const.shell_file_suffix
+config_default_dir = const.config_default_dir
+sh_default_dir = const.sh_default_dir
 
 
 class Node(object):

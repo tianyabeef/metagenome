@@ -4,7 +4,7 @@ from __future__ import division
 import sys
 import re
 import argparse
-import workflow.util.globals as glo
+from workflow.util.globals import const
 from workflow.util.useful import parse_group_file,mkdir,Rparser,get_name,image_trans
 from collections import OrderedDict
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
     write(otu_in_group, for_plot)
 
     r_job = Rparser()
-    r_job.open(glo.Rscript + '02_venn.R')
+    r_job.open(const.Rscript + '02_venn.R')
     r_job.format(vars)
     r_job.write(dirname+ '/otu_venn.R')
     r_job.run()

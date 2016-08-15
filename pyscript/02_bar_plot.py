@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*- #
-
+from __future__ import division
 __author__ = "huangy"
 __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
 
-from __future__ import division
+
 import sys
 import os
 import argparse
-import workflow.util.globals as glo
+from workflow.util.globals import const
 from workflow.util.useful import parse_group_file,mkdir,Rparser,get_name,image_trans
 
 
@@ -46,7 +46,7 @@ if __name__ == '__main__':
     top = params['top']
     title = params['title']
     mkdir(os.path.split(outputfile)[0])
-    RscriptDir = glo.Rscript
+    RscriptDir = const.Rscript
     r_job = Rparser()
     r_job.open("%s/02_bar_plot.Rtp"%RscriptDir)
     vars = {"top":top,

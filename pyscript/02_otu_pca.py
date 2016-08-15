@@ -5,7 +5,7 @@ from __future__ import division
 import sys
 import re
 import argparse
-import workflow.util.globals as glo
+from workflow.util.globals import const
 from workflow.util.useful import parse_group_file,mkdir,Rparser,get_name,image_trans
 from collections import OrderedDict
 
@@ -41,14 +41,14 @@ if __name__ == '__main__':
     r_job = Rparser()
     if params['two_legend']:
         if params['with_boxplot']:
-            r_job.open(glo.Rscript + '/03_tax_pca_two.Rtp')
+            r_job.open(const.Rscript + '/03_tax_pca_two.Rtp')
         else:
-            r_job.open(glo.Rscript + '/03_tax_pca_two.Rtp')
+            r_job.open(const.Rscript + '/03_tax_pca_two.Rtp')
     else:
         if params['with_boxplot']:
-            r_job.open(glo.Rscript + '/03_tax_pca_with_boxplot.Rtp')
+            r_job.open(const.Rscript + '/03_tax_pca_with_boxplot.Rtp')
         else:
-            r_job.open(glo.Rscript + '/03_tax_pca.Rtp')
+            r_job.open(const.Rscript + '/03_tax_pca.Rtp')
     r_job.format(vars)
     r_job.write(params['out_dir'] + '/tax_pca.R')
     r_job.run()

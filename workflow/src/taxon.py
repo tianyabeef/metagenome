@@ -7,12 +7,12 @@ import  os
 import re
 from  ConfigParser import ConfigParser
 from workflow.util.useful import mkdir,parse_group,get_name
-from workflow.util import globals
+from workflow.util.globals import const
 
 def taxon(config,sh_default_file,outpath,name):
     commands = []
     work_dir = os.path.dirname(config)
-    pyscript_dir = globals.PYscript
+    pyscript_dir = const.PYscript
     commands.append("## calculate abundance")
     commands.append("/data_center_01/pipeline/huangy/metagenome/perlscript/02_speciesabundance clean_reads_list bacteria,fungi,archaea,virus")
     commands.append("nohup /data_center_03/USER/zhongwd/bin/qsge --queue all.q --resource vf=15G --maxjob 10 --jobprefix MA --lines 1 --getmem shell_alignment/match.sh &")

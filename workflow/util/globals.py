@@ -12,4 +12,4 @@ const.config_file_suffix = "config"
 const.shell_file_suffix = "sh"
 const.step_names_order = "00.raw_reads,01.clean_reads,02.taxon,03.assembly,04.gene_predict,05.gene_catalog,06.gene_profile,07.kegg,08.eggnog,09.ardb"
 const.Rscript = "%s/Rscript/"%const.pipeline_dir
-const.PYscript = "%s/pyscript"%const.pipeline_dir
+const.PYscript = "%s/pyscript/"%const.pipeline_dir
