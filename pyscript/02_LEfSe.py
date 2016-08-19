@@ -7,7 +7,7 @@ sys.path.append('/data_center_01/pipeline/huangy/metagenome/')
 import argparse
 from workflow.util.globals import const
 from workflow.util.useful import parse_group_file,mkdir,Rparser,get_name,image_trans,cutcol_dataFrame
-
+import warnings
 
 
 def read_params(args):
@@ -26,6 +26,8 @@ def read_params(args):
                         help="set the class row, [default is 1]")
     parser.add_argument('--subject_row', dest='u', metavar='INT', type=int, default=2,
                         help="set the subject row, [default is 2]")
+    parser.add_argument('--quantile',dest="quantile",metavar='FLOAT',type=float,default=0)
+    parser.add_argument('--cut_off',dest='cut_off',metavar='FLOAT',type=float,default=1e-20)
     args = parser.parse_args()
     params = vars(args)
     params['groupDir'] = params['group']
@@ -37,11 +39,13 @@ def read_params(args):
     return params
 
 
-def do_format(infile, outfile, groupDir):
+def do_format(infile, outfile, groupDir,quantile,cut_off):
     data,group = cutcol_dataFrame(infile,groupDir)
     groups=group.values()
     samples = group.keys()
-    data.index=data.index().replace(';','|')
+
+    data.index=[i.replace('[','') for i in data.index.tolist()]
+    data.index=[i.replace(']','') for i in data.index.tolist()]
     for temp in data.index:
         if temp.endswith('Other'):
             data.drop(temp)
@@ -49,6 +53,20 @@ def do_format(infile, outfile, groupDir):
             data.drop(temp)
         if temp.endswith('unclassfied'):
             data.drop(temp)
+    sample_num = len(data.columns)
+    data["sum"] = data.sum(axis=1)
+    data = data.sort_values(by="sum",ascending=False)
+    quantile_value = float(data["sum"].quantile(quantile))
+    dd = data[data>cut_off]
+    data["num_True"] = dd.count(axis=1)
+    index_list = []
+    for i in range(len(data.index)):
+        if data.ix[i,sample_num] < quantile_value:
+            if data.ix[i,sample_num+1] <2:
+                index_list.append(i)
+    data = data.drop(data.index[index_list])
+    del data["sum"]
+    del data["num_True"]
     with open(outfile, 'w') as out_fp:
         out_fp.write('class\t%s\n' % '\t'.join(groups))
         out_fp.write('Taxon\t%s\n' % '\t'.join(samples))
@@ -83,7 +101,7 @@ if __name__ == '__main__':
     params = read_params(sys.argv)
     mkdir(params['out_dir'])
     for_analysis = '%s/otu_table_for_lefse.txt' % params['out_dir']
-    do_format(params['infile'], for_analysis, params['groupDir'])
+    do_format(params['infile'], for_analysis, params['groupDir'],params['quantile'],params['cut_off'])
     commands = get_commands(for_analysis, params['LEfSe_path'], params['out_dir'],
                             params['LDA'], params['c'], params['u'])
     with open(params['out_dir'] + '/commands.sh', 'w') as fp:

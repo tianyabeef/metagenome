@@ -17,7 +17,7 @@ import pandas as pd
 
 
 def read_params(args):
-    parser = argparse.ArgumentParser(description='alignement parse 20160504 huangy')
+    parser = argparse.ArgumentParser(description='alignement parse 20160819 huangy')
     parser.add_argument('-i', '--input', dest='input', metavar="SOAP_LIST", type=str, required=True,
                         help="match.list")
     parser.add_argument('-o', '--output', dest='output', metavar='FILE', type=str, required=True,

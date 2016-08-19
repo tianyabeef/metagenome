@@ -18,7 +18,7 @@ def cutcol_dataFrame(data,group):
     data = pd.DataFrame.from_csv(data,sep="\t")
     samples = parse_group_file(group).keys()
     data.to_csv()
-    return data.loc[:samples],samples
+    return data.loc[:,samples],parse_group_file(group)
 def mkdir(path):
     if not os.path.exists(path):
         os.mkdir(path)

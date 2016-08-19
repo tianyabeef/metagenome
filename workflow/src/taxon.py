@@ -5,18 +5,31 @@ __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
 import  os
 import re
-from  ConfigParser import ConfigParser
+from configparser import ConfigParser
 from workflow.util.useful import mkdir,parse_group,get_name
 from workflow.util.globals import const
+import yaml
 
 def taxon(config,sh_default_file,outpath,name):
     commands = []
     work_dir = os.path.dirname(config)
     pyscript_dir = const.PYscript
+    #updata config.yaml
+    f = open(const.config_yaml)
+    yl = yaml.load(f)
+    f.close()
+    yl["work_dir"]="%s/../"%work_dir
+    yl["clean_reads_list"] = "02.tax/clean_read.list"
+    fout = open('%s/config.yaml'%work_dir, "w")
+    yaml.dump(yl,fout,default_flow_style=False)
+    fout.close()
+    os.system("cp %s %s/snakemake"%(const.snakemake,work_dir))
+    os.system("cp %s %s/cluster.yaml"%(const.cluster_yaml,work_dir))
+    mkdir("%s/log/"%work_dir)
+    mkdir("%s/log/align/"%work_dir)
+    mkdir("%s/log/abund/"%work_dir)
     commands.append("## calculate abundance")
-    commands.append("/data_center_01/pipeline/huangy/metagenome/perlscript/02_speciesabundance clean_reads_list bacteria,fungi,archaea,virus")
-    commands.append("nohup /data_center_03/USER/zhongwd/bin/qsge --queue all.q --resource vf=15G --maxjob 10 --jobprefix MA --lines 1 --getmem shell_alignment/match.sh &")
-    commands.append("nohup /data_center_03/USER/zhongwd/bin/qsge --queue all.q --resource vf=15G --maxjob 10 --jobprefix AB --lines 2 --getmem shell_alignment/abun.sh &")
+    commands.append("snakemake --cluster-config cluster.yaml --cluster 'qsub -o {cluster.qsublog} -e {cluster.qsublog} -l vf={cluster.vf}' -j 50 --nolock --config clean_reads_list=\"02.tax/clean_reads_list\"")
     commands.append("## form species profile")
     commands.append("ls alignment/*/*species.abundance >list")
     commands.append("python /data_center_01/pipeline/huangy/metagenome/pyscript/02_taxnomy.py -i list")
@@ -28,6 +41,7 @@ def taxon(config,sh_default_file,outpath,name):
     commands.append("ls alignment/*/*family.abundance  | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > profile/family.profile")
     commands.append("ls alignment/*/*order.abundance   | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > profile/order.profile")
     commands.append("ls alignment/*/*phylum.abundance  | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > profile/phylum.profile")
+    commands.append("ls alignment/*/*all.abundance | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > profile/all.profile")
     commands.append("## use rate")
     commands.append("#mkdir use_rate")
     commands.append("#ls alignment/*/*MATCH |while read a; do echo \"perl /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/bin/stat.pl < $a > $a.stat\" ;done > use_rate/stat.sh")
@@ -50,21 +64,21 @@ def taxon(config,sh_default_file,outpath,name):
     commands.append("perl /data_center_03/USER/zhongwd/rd/Finish/07_acumm_share_curve/Accumulated_Shared_Curve.pl -p 03.accum_share/species.profile -c species -t 100")
     commands.append("## 04.rarecurve")
     mkdir("%s/04.rarecurve"%(work_dir))
-    commands.append("list alignment/*/*MATCH > 04.rarecurve/match.list; sed 's/.*alignment\/\(.*\)\/.*MATCH/\\1/g' 04.rarecurve/match.list | paste - 04.rarecurve/match.list > 04.rarecurve/match.list.tmp; mv -f 04.rarecurve/match.list.tmp 04.rarecurve/match.list")
-    commands.append("nohup perl /data_center_03/USER/zhongwd/rd/05_rarecurve/RareCurve/RareCurve.pl -s clean_reads_list -m 04.rarecurve/match.list -d 04.rarecurve &")
+    commands.append("#list alignment/*/*MATCH > 04.rarecurve/match.list; sed 's/.*alignment\/\(.*\)\/.*MATCH/\\1/g' 04.rarecurve/match.list | paste - 04.rarecurve/match.list > 04.rarecurve/match.list.tmp; mv -f 04.rarecurve/match.list.tmp 04.rarecurve/match.list")
+    commands.append("#nohup perl /data_center_03/USER/zhongwd/rd/05_rarecurve/RareCurve/RareCurve.pl -s clean_reads_list -m 04.rarecurve/match.list -d 04.rarecurve &")
 
     commands.append("## 06.ternaryplot")
     mkdir("%s/06.ternaryplot"%(work_dir))
-    commands.append("#Rscript /data_center_04/Projects/pichongbingdu/pair_reads/02.taxon/ternary/ternary.r profile/species.profile sample.list 06.ternaryplot/species.ternary.pdf species")
-    commands.append("#Rscript /data_center_04/Projects/pichongbingdu/pair_reads/02.taxon/ternary/ternary.r profile/genus.profile   sample.list 06.ternaryplot/genus.ternary.pdf   genus")
+    commands.append("Rscript /data_center_04/Projects/pichongbingdu/pair_reads/02.taxon/ternary/ternary.r profile/species.profile sample.list 06.ternaryplot/species.ternary.pdf species")
+    commands.append("Rscript /data_center_04/Projects/pichongbingdu/pair_reads/02.taxon/ternary/ternary.r profile/genus.profile   sample.list 06.ternaryplot/genus.ternary.pdf   genus")
     commands.append("## 07.treeplot")
     mkdir("%s/07.treeplot"%(work_dir))
-    commands.append("#cut -f 1 clean_reads_list | while read a; do mkdir 07.treeplot/$a; perl /data_center_03/USER/zhongwd/temp/0106/tree/a.pl < alignment/$a/$a.species.abundance > 07.treeplot/$a/test.info 2> 07.treeplot/$a/test.tax; done")
-    commands.append("#cut -f 1 clean_reads_list | while read a; do cd 07.treeplot/$a; perl /data_center_03/USER/zhongwd/temp/0106/tree/zwd_newwick.pl < test.tax > test.tre; ~/anaconda_ete/bin/python /data_center_03/USER/zhongwd/temp/0106/tree/plottre.py; cd -; done")
+    commands.append("cut -f 1 clean_reads_list | while read a; do mkdir 07.treeplot/$a; perl /data_center_03/USER/zhongwd/temp/0106/tree/a.pl < alignment/$a/$a.species.abundance > 07.treeplot/$a/test.info 2> 07.treeplot/$a/test.tax; done")
+    commands.append("cut -f 1 clean_reads_list | while read a; do cd 07.treeplot/$a; perl /data_center_03/USER/zhongwd/temp/0106/tree/zwd_newwick.pl < test.tax > test.tre; ~/anaconda_ete/bin/python /data_center_03/USER/zhongwd/temp/0106/tree/plottre.py; cd -; done")
 
     commands.append("## 08.cluster")
     mkdir("%s/08.cluster"%(work_dir))
-    commands.append("#Rscript /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/test/barplot/bartreeplot.r profile/species.profile sample.list 08.cluster/species.clust.pdf")
+    commands.append("Rscript /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/test/barplot/bartreeplot.r profile/species.profile sample.list 08.cluster/species.clust.pdf")
 
     for subgroup in group:
         dirname,subgroup_name,_ = get_name(subgroup)
@@ -100,5 +114,6 @@ def taxon(config,sh_default_file,outpath,name):
         commands.append("cd group/%s/11-14.beta_div/species; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/species.profile -g %s -m bray -r; cd -"%(subgroup_name,subgroup))
         commands.append("cd group/%s/11-14.beta_div/genus; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/genus.profile -g %s -m bray -r; cd -"%(subgroup_name,subgroup))
         mkdir("%s/group/%s/15.LEfSe"%(work_dir,subgroup_name))
-        commands.append("/data_center_01/pipeline/16S_ITS_pipeline_v3.0/script/05_LEfSe.py -i profile/species.profile -l /data_center_03/USER/huangy/soft/LEfSe_lzb -g %s -o group/%s/15.LEfSe/ --LDA 2"%(subgroup,subgroup_name))
+        commands.append("%s/02_LEfSe.py -i %s/profile/species.profile -l /data_center_03/USER/huangy/soft/LEfSe_lzb -g %s -o %s/group/%s/15.LEfSe/ --LDA 2"\
+                        %(pyscript_dir,work_dir,subgroup,work_dir,subgroup_name))
     return commands

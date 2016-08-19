@@ -6,9 +6,7 @@ __version__ = "1.0.0-dev"
 import  argparse
 import sys
 import re
-GENOME_TXT = "/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.TAX"
-#TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
-TAXLIST=["/data_center_04/Projects/test_Q30/metagenomic/GENOMEall.txt"]
+TAXLIST=["/data_center_06/Database/GENOMEall.txt"]
 def read_params(args):
     parser = argparse.ArgumentParser(description='group file change')
     parser.add_argument('-i', '--input', dest='input', metavar='input', type=str, required=True,
@@ -18,6 +16,13 @@ def read_params(args):
     args = parser.parse_args()
     params = vars(args)
     return params
+special = ["[","]","(",")",".","-"," ","+",":"]
+def format_taxonomy_name(name,level):
+    for i in special:
+        if i==" ":
+            name = re.sub("\s+","_",name)
+        name = name.replace(i,"")
+    return "%s__%s"%(level,name)
 
 if __name__ == '__main__':
     params = read_params(sys.argv)
@@ -27,6 +32,12 @@ if __name__ == '__main__':
     order_pro={}
     class_pro={}
     phylum_pro={}
+    king_pro = {}
+    taxanomy2 = {}
+    taxanomy3 = {}
+    taxanomy4 = {}
+    taxanomy5 = {}
+    taxanomy6 = {}
     for val in TAXLIST:
         with open(val,"r") as fq:
             for line in fq:
@@ -37,7 +48,12 @@ if __name__ == '__main__':
                 order_pro[species] = tax[-4]
                 class_pro[species] = tax[-5]
                 phylum_pro[species] = tax[-6]
-
+                king_pro[species] = tax[-7]
+                taxanomy2[tax[-2]] = tax[1:]
+                taxanomy3[tax[-3]] = tax[1:]
+                taxanomy4[tax[-4]] = tax[1:]
+                taxanomy5[tax[-5]] = tax[1:]
+                taxanomy6[tax[-6]] = tax[1:]
 
 
     with open(list_file,"r") as fq:
@@ -49,30 +65,56 @@ if __name__ == '__main__':
             order_abun = {}
             class_abun = {}
             phylum_abun = {}
-            with open(line.strip(),"r") as fq2:
-                for line_abu in fq2:
-                    species,abun = line_abu.strip().split("\t")
-                    abun = float(abun)
-                    genus_abun[genus_pro[species]] = genus_abun[genus_pro[species]] + abun if genus_abun.has_key(genus_pro[species]) else abun
-                    family_abun[family_pro[species]] = abun + family_abun[family_pro[species]]  if family_abun.has_key(family_pro[species]) else abun
-                    order_abun[order_pro[species]] = abun + order_abun[order_pro[species]] if order_abun.has_key(order_pro[species]) else abun
-                    class_abun[class_pro[species]] = abun + class_abun[class_pro[species]] if class_abun.has_key(class_pro[species]) else abun
-                    phylum_abun[phylum_pro[species]] = abun + phylum_abun[phylum_pro[species]] if phylum_abun.has_key(phylum_pro[species]) else abun
+            king_abun = {}
+            with open("%s.all.abundance" % name,"w") as fqall:
+                with open(line.strip(),"r") as fq2 , open("%s.species.abundance2" % name,"w") as fqs:
+                    for line_abu in fq2:
+                        species,abun = line_abu.strip().split("\t")
+                        abun = float(abun)
+                        fqs.write("%s\t%s\n" % (format_taxonomy_name(species,"s"),abun))
+                        genus_abun[genus_pro[species]] = genus_abun[genus_pro[species]] + abun if genus_abun.has_key(genus_pro[species]) else abun
+                        family_abun[family_pro[species]] = abun + family_abun[family_pro[species]]  if family_abun.has_key(family_pro[species]) else abun
+                        order_abun[order_pro[species]] = abun + order_abun[order_pro[species]] if order_abun.has_key(order_pro[species]) else abun
+                        class_abun[class_pro[species]] = abun + class_abun[class_pro[species]] if class_abun.has_key(class_pro[species]) else abun
+                        phylum_abun[phylum_pro[species]] = abun + phylum_abun[phylum_pro[species]] if phylum_abun.has_key(phylum_pro[species]) else abun
+                        king_abun[king_pro[species]] = abun + king_abun[king_pro[species]] if king_abun.has_key(king_pro[species]) else abun
 
-
-            with open("%s.genus.abundance" % name,"w") as fqw:
-                for key,value in genus_abun.items():
-                    fqw.write("%s\t%s\n" % (key,value))
-            with open("%s.family.abundance" % name,"w") as fqw:
-                for key,value in family_abun.items():
-                    fqw.write("%s\t%s\n" % (key,value))
-            with open("%s.order.abundance" % name,"w") as fqw:
-                for key,value in order_abun.items():
-                    fqw.write("%s\t%s\n" % (key,value))
-            with open("%s.class.abundance" % name,"w") as fqw:
-                for key,value in class_abun.items():
-                    fqw.write("%s\t%s\n" % (key,value))
-            with open("%s.phylum.abundance" % name,"w") as fqw:
-                for key,value in phylum_abun.items():
-                    fqw.write("%s\t%s\n" % (key,value))
-
+                        fqall.write("%s|%s|%s|%s|%s|%s|%s\t%s\n" % (format_taxonomy_name(king_pro[species],"k"),\
+                                                                    format_taxonomy_name(phylum_pro[species],"p"),\
+                                                                    format_taxonomy_name(class_pro[species],"c"),\
+                                                                 format_taxonomy_name(order_pro[species],"o"),\
+                                                                    format_taxonomy_name(family_pro[species],"f"),\
+                                                                format_taxonomy_name(genus_pro[species],"g"),\
+                                                                 format_taxonomy_name(species,"s"),abun))
+                with open("%s.king.abundance" % name,"w") as fqw:
+                    for key,value in king_abun.items():
+                        fqw.write("%s\t%s\n" % (format_taxonomy_name(key,"k"),value))
+                        fqall.write("%s\t%s\n" % (format_taxonomy_name(key,"k"),value))
+                with open("%s.phylum.abundance" % name,"w") as fqw:
+                    for key,value in phylum_abun.items():
+                        fqw.write("%s\t%s\n" % (format_taxonomy_name(key,"p"),value))
+                        fqall.write("%s|%s\t%s\n" % (format_taxonomy_name(taxanomy6[key][0],"k"),format_taxonomy_name(key,"p"),value))
+                with open("%s.class.abundance" % name,"w") as fqw:
+                    for key,value in class_abun.items():
+                        fqw.write("%s\t%s\n" % (format_taxonomy_name(key,"c"),value))
+                        fqall.write("%s|%s|%s\t%s\n" % (format_taxonomy_name(taxanomy5[key][0],"k"),\
+                                                        format_taxonomy_name(taxanomy5[key][1],"p"),\
+                                                                             format_taxonomy_name(key,"c"),value))
+                with open("%s.order.abundance" % name,"w") as fqw:
+                    for key,value in order_abun.items():
+                        fqw.write("%s\t%s\n" % (format_taxonomy_name(key,"o"),value))
+                        fqall.write("%s|%s|%s|%s\t%s\n" % (format_taxonomy_name(taxanomy4[key][0],"k"),format_taxonomy_name(taxanomy4[key][1],"p"),\
+                                                           format_taxonomy_name(taxanomy4[key][2],"c"),\
+                                                  format_taxonomy_name(key,"o"),value))
+                with open("%s.family.abundance" % name,"w") as fqw:
+                    for key,value in family_abun.items():
+                        fqw.write("%s\t%s\n" % (format_taxonomy_name(key,"f"),value))
+                        fqall.write("%s|%s|%s|%s|%s\t%s\n" % (format_taxonomy_name(taxanomy3[key][0],"k"),format_taxonomy_name(taxanomy3[key][1],"p"),\
+                                                                format_taxonomy_name(taxanomy3[key][2],"c"),format_taxonomy_name(taxanomy3[key][3],"o"),\
+                                                                format_taxonomy_name(key,"f"),value))
+                with open("%s.genus.abundance" % name,"w") as fqw:
+                    for key,value in genus_abun.items():
+                        fqw.write("%s\t%s\n" % (format_taxonomy_name(key,"g"),value))
+                        fqall.write("%s|%s|%s|%s|%s|%s\t%s\n" % (format_taxonomy_name(taxanomy2[key][0],"k"),format_taxonomy_name(taxanomy2[key][1],"p"),\
+                                                                 format_taxonomy_name(taxanomy2[key][2],"c"),format_taxonomy_name(taxanomy2[key][3],"o"),\
+                                                                 format_taxonomy_name(taxanomy2[key][4],"f"),format_taxonomy_name(key,"g"),value))
