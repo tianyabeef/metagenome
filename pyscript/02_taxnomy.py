@@ -42,6 +42,7 @@ if __name__ == '__main__':
         with open(val,"r") as fq:
             for line in fq:
                 tax = line.strip().split("\t")
+                tax = tax[:-2]
                 species = tax[-1]
                 genus_pro[species] = tax[-2]
                 family_pro[species] = tax[-3]
