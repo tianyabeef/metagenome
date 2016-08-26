@@ -47,7 +47,7 @@ def read_pe(pe):
                     continue
                 flag = tabs[4]
                 if flag == "a":
-                    outstring = "%s\tP\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
+                    outstring = "%s\t%s\t%s" % (refer, tabs[-2], tabs[9])
                     if inf.has_key(query):
                         inf[query] = "%s,%s" % (outstring, inf[query])
                     else:
@@ -142,6 +142,7 @@ if __name__ == '__main__':
         df_list.append(df)
     df_final = pd.concat(df_list, axis=1)
     df_final.to_csv(outputfile,sep=",",header=True)
+    df_final.reindex(index=range(len(df_final.index)))
     end = time.time()
     sys.stdout.write("concat step run time: %s\n" % (end-start))
 

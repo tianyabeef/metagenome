@@ -55,8 +55,8 @@ if __name__ == '__main__':
     strain = {}
     gi_len = {}
     species = {}
-    TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
-    SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160422/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
+    TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
+    SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
     for ttax in TAXLIST:
         with open(ttax,"r") as fq:
             for line in fq:
@@ -89,15 +89,15 @@ if __name__ == '__main__':
                 if not key:
                     continue
                 chot = key.strip().strip("\"").split("\t")
-                chot[4]=int(chot[4].strip('M'))
-                if ( ( (chot[1] == "P") and (chot[3] == "b") ) or (chot[1] == "S")):
-                    sys.stdout.write("warning hava s or P b\n")
+                chot[1]=int(chot[1].strip('M'))
+                #if ( ( (chot[1] == "P") and (chot[3] == "b") ) or (chot[1] == "S")):
+                #    sys.stdout.write("warning hava s or P b\n")
+                #else:
+                if min_alignment_len==None or min_alignment_len<chot[1]:
+                    hits.append((chot[0],chot[1],chot[2]))
                 else:
-                    if min_alignment_len==None or min_alignment_len<chot[4]:
-                        hits.append((chot[0],chot[4],chot[5]))
-                    else:
-                        sys.stderr.write("align match length is %s < %s "%(chot[4],min_alignment_len))
-                        continue
+                    sys.stderr.write("align match length is %s < %s "%(chot[1],min_alignment_len))
+                    continue
             hits = sorted(hits,key=lambda x: (-x[1], x[2]))
             max_M = hits[0][1]
             min_s = hits[0][2]
