@@ -35,8 +35,7 @@ def read_pe(pe):
         inf = {}
         start = time.time()
         with open(key, "r") as fq:
-            names = re.split('\.|-', key)
-            stringname = names[-2]
+            stringname = os.path.basename(os.path.splitext(key)[0])
             sys.stdout.write("running  %s\n" % stringname)
             for line in fq:
                 tabs = line.strip().split("\t")
@@ -74,8 +73,7 @@ def read_se(se,pkl_list):
         inf = {}
         start = time.time()
         with open(key, "r") as fq:
-            names = re.split('\.|-', key)
-            stringname = names[-2]
+            stringname = os.path.basename(os.path.splitext(key)[0])
             sys.stdout.write("running  %s\n" % stringname)
             for line in fq:
                 tabs = line.strip().split("\t")
@@ -97,9 +95,9 @@ def read_se(se,pkl_list):
         #df_first = pd.concat([df_first,df], axis=1)
         end = time.time()
         sys.stdout.write("load %s data run time: %s\n" % (stringname,end-start))
-#        f1 = file("%s.pkl" % key, 'wb')
-#        pickle.dump(inf,f1,protocol=2)
-#        f1.close()
+        f1 = file("%s.pkl" % key, 'wb')
+        pickle.dump(inf,f1,protocol=2)
+        f1.close()
 
     return pkl_list
 

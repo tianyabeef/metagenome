@@ -12,6 +12,7 @@ sys.path.append('/data_center_01/pipeline/huangy/metagenome/')
 import argparse
 from workflow.util.globals import const
 from workflow.util.useful import parse_group_file,mkdir,Rparser,get_name,image_trans
+import pandas as pd
 
 
 def read_params(args):
@@ -46,12 +47,18 @@ if __name__ == '__main__':
     inputfile = params['inputfile']
     top = params['top']
     title = params['title']
+    data = pd.DataFrame.from_csv(file=inputfile,sep="\t")
+    data["sum"] = data.sum(axis=1)
+    data = data.sort_index(by="sum",ascending=False)
+    del data["sum"]
+    data = data.ix[:top]
+    data.to_csv("%s/for_plot.csv"%dirname,sep="\t")
     mkdir(os.path.split(outputfile)[0])
     RscriptDir = const.Rscript
     r_job = Rparser()
     r_job.open("%s/02_barplot.R"%RscriptDir)
     vars = {"top":top,
-            "infile": inputfile,
+            "infile": "%s/for_plot.csv"%dirname,
             "pdf_file": outputfile,
             "title": title}
     r_job.format(vars)

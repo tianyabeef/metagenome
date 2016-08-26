@@ -13,8 +13,8 @@ def read_params(args):
                         help="MATCH file")
     parser.add_argument('-o', '--species_abundance', dest='species_abundance', metavar='FILE', type=str, required=True,
                         help="species_abundance")
-    #parser.add_argument('-log', '--log', dest='log', metavar='FILE', type=str, required=True,
-    #                    help="species_abundance.log")
+    parser.add_argument('-log', '--log', dest='log', metavar='FILE', type=str, required=True,
+                        help="species_abundance.log")
     parser.add_argument('-r',dest='rep',metavar='NUM',type=int,default=2,
                         help=" INT   How  to  report repeat hits,1=random one; 2=all, [2]")
     parser.add_argument( '--stat',dest = "stat", metavar="STR", choices=stat_choices, default="tavg_g", type=str, help =
@@ -161,6 +161,6 @@ if __name__ == '__main__':
         df = pd.DataFrame(abund_sp,index=["a"])
         total_abundance = float(df.sum(axis=1))
         abund_sp = sorted(abund_sp.items(),key = lambda d: d[1])
-        for key,value in abund_sp.items():
+        for key,value in abund_sp:
             outfq.write("%s\t%s\n"%(key,value/total_abundance))
 

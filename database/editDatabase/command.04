@@ -1,5 +1,5 @@
 pwd_path=/data_center_06/Database/NCBI_Fungi/20160601
-cut -f 7 assembly_summary.txt |sort -n >tax_info/tax_species_id.sort.list
+cut -f 7 assembly_summary.txt  >tax_info/tax_species_id.sort.list
 
 #cut -f 7 $pwd_path/assembly_summary.txt |ete ncbiquery  --info >$pwd_path/tax_info/tax_spcies.txt
 #cut -f 6 $pwd_path/assembly_summary.txt |ete ncbiquery  --info >$pwd_path/tax_info/tax.txt

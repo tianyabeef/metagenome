@@ -4,7 +4,9 @@ import argparse
 import os
 import sys
 from Bio import SeqIO
-
+from multiprocessing import Pool
+from multiprocessing import cpu_count
+from time import time
 
 def read_params(args):
     parser = argparse.ArgumentParser(description='plot alpha rare | v1.0 at 2015/09/28 by liangzb')
@@ -26,6 +28,8 @@ def read_params(args):
                         help="2 : two file out ;  4 : four file out.")
     parser.add_argument('--min_len',dest="min_len",metavar="min_len",type=int,default=49,
                         help="min_len[50]")
+    #parser.add_argument('--process',dest='process',metavar="INT",type=int,default=10,
+    #                    help = "set process num")
     args = parser.parse_args()
     params = vars(args)
     return params
@@ -51,23 +55,25 @@ def situation_1(read1,read2,adaptor1,adaptor2,min_len):#adaptor1 30个碱基匹�
         pos = seq1.find(adaptor1[0:30]) #截取30个碱基的adaptor1
     else:
         pos = seq1.find(adaptor1)
-    if pos > min_len:  #控制长度大于40
+    if pos > min_len:  #控制长度大于50
         return True,read1[:pos],read2[:pos] # del seq1\seq2
     if len(adaptor2) > 30:
         pos2 = seq2.find(adaptor2[0:30])
     else:
         pos2 = seq2.find(adaptor2)
-    if pos2 > min_len: #控制长度大于40
+    if pos2 > min_len: #控制长度大于50
         return True,read1[:pos2],read2[:pos2]
-    return False,[],[]
+    if pos==-1 and pos2==-1:
+        return False,read1,read2
+    return True,None,None
 def situation_2(read1,read2,adaptor1,adaptor2): #四次匹配中只有0、1、2次匹配上的
     seq1 = read1.seq
     seq2 = read2.seq
     true_num = 0
-    adaptor_read1_pos_1 = match_adaptor(seq1,adaptor1[0:7])
-    adaptor_read1_pos_2 = match_adaptor(seq1,adaptor1[7:13])
+    adaptor_read1_pos_1 = match_adaptor(seq1,adaptor1[0:7]) #考虑接头自连情况没有写【0:7】
+    adaptor_read1_pos_2 = match_adaptor(seq1,adaptor1[7:14])
     adaptor_read2_pos_1 = match_adaptor(seq2,adaptor2[0:7])
-    adaptor_read2_pos_2 = match_adaptor(seq2,adaptor2[7:13])
+    adaptor_read2_pos_2 = match_adaptor(seq2,adaptor2[7:14])
     if adaptor_read1_pos_1:
         true_num += 1
     if adaptor_read1_pos_2:
@@ -79,7 +85,7 @@ def situation_2(read1,read2,adaptor1,adaptor2): #四次匹配中只有0、1、2�
     if true_num == 0 or true_num==1 :
         return True,read1,read2 #clean reads
     else:
-        return False,[],[]
+        return False,None,None
 def rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len):
     result = situation_1(read1,read2,adaptor1,adaptor2,min_len)
     if result[0]:
@@ -103,7 +109,7 @@ def rmSE(read,adaptor,mistaken_ratio,min_len):
     adaptor_len = len(adaptor)
 
     seq_len = len(seq)
-    for i in [0,6,12]:
+    for i in [0,6]:#之前是【0,6,12】
         seed = adaptor[i:i+seed_len]
         pos = 0
         while(pos < seq_len):
@@ -136,7 +142,7 @@ def rmSE(read,adaptor,mistaken_ratio,min_len):
                             return False,None
                 pos = find_pos + 1
             else:
-                break
+                return False,None
     return True,read
 
 
@@ -154,6 +160,12 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
             for read1 in SeqIO.parse(open(read1_file),'fastq'):
                 total_read_num += 2
                 read2 = read2_records.next()
+                #p = Pool(process_num-(process_num/3))
+                #for i in range(process_num):
+                    #rmPE_res= p.apply_async(rmPE,args=(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len))
+                #p.close()
+                #p.join()
+
                 rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len)
                 if rmPE_res[0]:
                     clean_read_num += 2
@@ -172,6 +184,11 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
                 total_read_num += 2
                 read2 = read2_records.next()
                 rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len)
+                #p = Pool(process_num-(process_num/3))
+                #for i in range(process_num):
+                    #rmPE_res= p.apply_async(rmPE,args=(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len))
+                #p.close()
+                #p.join()
                 if rmPE_res[0]:
                     clean_read_num += 2
                     read1_out.write(rmPE_res[1].format('fastq'))#clean read
@@ -203,6 +220,9 @@ if __name__ == '__main__':
     mistaken_ratio = params["mistaken_ratio"]
     out_type = params["out_type"]
     min_len = params["min_len"]
+    #process_num = params["process"]
+    #sys.stdout.write("you have the number of cpu is %s ,you set process is %s"%(cpu_count(),process_num))
+    starttime = time()
     # type ="PE"
     # read1_file="D:\\Workspaces\\metagenome\\test.1.fq"
     # read2_file="D:\\Workspaces\\metagenome\\test.2.fq"
@@ -216,3 +236,5 @@ if __name__ == '__main__':
     with open("%s_adaptor_statistical.tsv" % out_prefix,mode="w") as fqout:
         fqout.write("sampleName\ttotal_reads\tremain_reads\tadaptor_reads\n")
         fqout.write("%s\t%s\t%s\t%s\n" % (os.path.basename(out_prefix),total_read_num,clean_read_num,adaptor_read_num))
+    endtime = time()
+    sys.stdout.write("use time %s second"%(endtime-starttime))

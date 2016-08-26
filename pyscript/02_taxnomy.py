@@ -11,8 +11,8 @@ def read_params(args):
     parser = argparse.ArgumentParser(description='group file change')
     parser.add_argument('-i', '--input', dest='input', metavar='input', type=str, required=True,
                         help="abundance of list file")
-    parser.add_argument('-o', '--outputdir', dest='outputdir', metavar='outputdir', type=str,
-                        help="out put dir")
+    #parser.add_argument('-o', '--outputdir', dest='outputdir', metavar='outputdir', type=str,
+    #                    help="out put dir")
     args = parser.parse_args()
     params = vars(args)
     return params

@@ -1,1 +1,1 @@
-wget ftp://ftp.ncbi.nlm.nih.gov/genomes/genbank/archaea/assembly_summary.txt
+wget http://ftp.ncbi.nlm.nih.gov/genomes/genbank/archaea/assembly_summary.txt
