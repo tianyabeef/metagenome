@@ -22,8 +22,10 @@ def read_params(args):
                         help="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT")
     parser.add_argument('--type',dest="type",metavar='string',type=str,required=True,
                         help="PE or SE")
-    parser.add_argument('--mistaken_ratio',dest="mistaken_ratio",metavar="int",type=float,default=0.2,
+    parser.add_argument('--mistaken_ratio',dest="mistaken_ratio",metavar="float",type=float,default=0.2,
                         help="mistaken_ratio defult[0.2]")
+    parser.add_argument('--mistaken_num', dest="mistaken_num", metavar="int", type=int, default=3,
+                        help="mistaken_ratio defult[3]")
     parser.add_argument('--out_type',dest="out_type",metavar="STRING",type=int,default=4,
                         help="2 : two file out ;  4 : four file out.")
     parser.add_argument('--min_len',dest="min_len",metavar="min_len",type=int,default=49,
@@ -36,7 +38,14 @@ def read_params(args):
 
 
 
-
+def get_mistaken_count_max(seq_len,find_pos,adaptor_len,mistaken_ratio,mistaken_num):
+    if seq_len - find_pos > adaptor_len:
+        mistaken_count_max = adaptor_len * mistaken_ratio
+    else:
+        mistaken_count_max = (seq_len - find_pos) * mistaken_ratio
+    if mistaken_count_max<float(mistaken_num):
+        mistaken_count_max=mistaken_num
+    return mistaken_count_max
 
 def match_adaptor(seq,seed):
 #seed_first
@@ -82,11 +91,11 @@ def situation_2(read1,read2,adaptor1,adaptor2): #四次匹配中只有0、1、2�
         true_num += 1
     if adaptor_read2_pos_2:
         true_num += 1
-    if true_num == 0 or true_num==1 :
+    if true_num == 0: #更严格是 true_num=1 删除了
         return True,read1,read2 #clean reads
     else:
         return False,None,None
-def rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len):
+def rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len,mistaken_num):
     result = situation_1(read1,read2,adaptor1,adaptor2,min_len)
     if result[0]:
         return False,result[1],result[2] #del seq1 and seq2
@@ -95,58 +104,63 @@ def rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len):
     if result[0]:
         return True,result[1],result[2]  #clean seq1 and seq2
 
-    res_1 = rmSE(read1,adaptor1,mistaken_ratio,min_len)
-    res_2 = rmSE(read2,adaptor2,mistaken_ratio,min_len)
+    res_1 = rmSE(read1,adaptor1,mistaken_ratio,min_len,mistaken_num)
+    if res_1[1] is None:
+        return False,None,None
+    res_2 = rmSE(read2,adaptor2,mistaken_ratio,min_len,mistaken_num)
     if res_1[0] and res_2[0]:
         return True,res_1[1],res_2[1]
     else:
-        return False,res_1[1],res_2[1]
+        if res_2[1] is  None:
+            return False, None, None
+        if res_1[2]>res_2[2]:
+            return False,res_1[1][:res_2[2],res_2[1]]
+        elif res_1[2]==res_2[2]:
+            return False,res_1[1],res_2[1]
+        else:
+            return False,res_1[1],res_2[1][:res_1[2]]
 
 
-def rmSE(read,adaptor,mistaken_ratio,min_len):
+def rmSE(read,adaptor,mistaken_ratio,min_len,mistaken_num):
     seq = read.seq
     seed_len = 6
     adaptor_len = len(adaptor)
-
     seq_len = len(seq)
-    for i in [0,6]:#之前是【0,6,12】
+    for i in [0,6,12]:#之前是【0,6,12】
         seed = adaptor[i:i+seed_len]
+        seed_count = seq.count(seed)
+        if seed_count==0:
+            continue
         pos = 0
-        while(pos < seq_len):
+        for j in range(seed_count):
             find_pos = seq.find(seed,pos)
-            if seq_len-find_pos>adaptor_len:
-                mistaken_count_max = adaptor_len*mistaken_ratio
-            else:
-                mistaken_count_max = (seq_len-find_pos)*mistaken_ratio
-            if find_pos > 0:
-                mistaken_count = 0
-                _b = find_pos
-                _e = find_pos + seed_len
-                while(_b >= 0 and i >= find_pos - _b):
-                    if adaptor[i - find_pos + _b] != seq[_b]:
+            mistaken_count_max =get_mistaken_count_max(seq_len, find_pos, adaptor_len, mistaken_ratio, mistaken_num)
+            mistaken_count = 0
+            _b = find_pos
+            _e = find_pos + seed_len
+            while(_b >= 0 and i >= find_pos - _b):
+                if adaptor[i - find_pos + _b] != seq[_b]:
+                    mistaken_count += 1
+                if mistaken_count > mistaken_count_max:
+                    break
+                _b -= 1
+            else :
+                while(_e < seq_len and i - find_pos + _e < adaptor_len):
+                    if adaptor[ i - find_pos + _e ] != seq[_e]:
                         mistaken_count += 1
                     if mistaken_count > mistaken_count_max:
                         break
-                    _b -= 1
-                else :
-                    while(_e < seq_len and i - find_pos + _e < adaptor_len):
-                        if adaptor[ i - find_pos + _e ] != seq[_e]:
-                            mistaken_count += 1
-                        if mistaken_count > mistaken_count_max:
-                            break
-                        _e += 1
-                    else:
-                        if _b+1 > min_len:
-                            return False,read[:_b+1]
-                        if (_b+1 >= 0)  and (_b+1 <= min_len):
-                            return False,None
-                pos = find_pos + 1
-            else:
-                return False,None
-    return True,read
+                    _e += 1
+                else:
+                    if _b+1 > min_len:
+                        return False,read[:_b+1],_b+1
+                    if (_b+1 >= 0)  and (_b+1 <= min_len):
+                        return False,None,0
+            pos = find_pos + 1
+    return True,read,seq_len
 
 
-def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio,min_len):
+def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio,min_len,mistaken_num):
     total_read_num = 0
     clean_read_num = 0
     adaptor_read_num = 0
@@ -166,14 +180,14 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
                 #p.close()
                 #p.join()
 
-                rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len)
+                rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len,mistaken_num)
                 if rmPE_res[0]:
                     clean_read_num += 2
                     read1_out.write(rmPE_res[1].format('fastq'))#clean read
                     read2_out.write(rmPE_res[2].format('fastq'))#clean read
                 else:
                     adaptor_read_num += 2
-                    if (rmPE_res[1]==None) or (rmPE_res[2]==None):
+                    if (rmPE_res[1] is None) or (rmPE_res[2] is None):
                         continue
                     read1_rm_out.write(rmPE_res[1].format('fastq'))#adaptor read
                     read2_rm_out.write(rmPE_res[2].format('fastq'))#adaptor read
@@ -183,7 +197,7 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
             for read1 in SeqIO.parse(open(read1_file),'fastq'):
                 total_read_num += 2
                 read2 = read2_records.next()
-                rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len)
+                rmPE_res = rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len,mistaken_num)
                 #p = Pool(process_num-(process_num/3))
                 #for i in range(process_num):
                     #rmPE_res= p.apply_async(rmPE,args=(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len))
@@ -195,7 +209,7 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
                     read2_out.write(rmPE_res[2].format('fastq'))#clean read
                 else:
                     adaptor_read_num += 2
-                    if (rmPE_res[1]==None) or (rmPE_res[2]==None):
+                    if (rmPE_res[1] is None) or (rmPE_res[2] is None):
                         continue
                     read1_out.write(rmPE_res[1].format('fastq'))#adaptor read
                     read2_out.write(rmPE_res[2].format('fastq'))#adaptor read
@@ -210,18 +224,32 @@ def rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,m
 
 
 if __name__ == '__main__':
+
+    # "python 01.rmAdaptor.py --type PE --out_prefix zwd_5 -r1 1.fq -r2 2.fq -a1 GATCGGAAGAGCACACGTCTGAACTCCAGTCAC -a2 GATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT --out_type 2"
+    #params = read_params(tt)
+    #read1_file = "1.fq"
+    #read2_file = "2.fq"
+    #adaptor1 = "GATCGGAAGAGCACACGTCTGAACTCCAGTCAC"[:30]
+    #adaptor2 = "GATCGGAAGAGCGTCGTGTAGGGAAAGAGTGTAGATCTCGGTGGTCGCCGTATCATT"[:30]
+    #type = "PE"
+    #out_prefix = "zwd_5"
+    #mistaken_ratio = 0.2
+    #out_type = 2
+    #min_len = 50
+    #mistaken_num = "3"
+    #process_num = params["process"]
+    #sys.stdout.write("you have the number of cpu is %s ,you set process is %s"%(cpu_count(),process_num))
     params = read_params(sys.argv)
     read1_file = params["read1"]
     read2_file = params["read2"]
-    adaptor1 = params["read1Adaptor"]
-    adaptor2 = params["read2Adaptor"]
+    adaptor1 = params["read1Adaptor"][:30]
+    adaptor2 = params["read2Adaptor"][:30]
     type = params["type"]
     out_prefix = params["out_prefix"]
     mistaken_ratio = params["mistaken_ratio"]
     out_type = params["out_type"]
     min_len = params["min_len"]
-    #process_num = params["process"]
-    #sys.stdout.write("you have the number of cpu is %s ,you set process is %s"%(cpu_count(),process_num))
+    mistaken_num = params["mistaken_num"]
     starttime = time()
     # type ="PE"
     # read1_file="D:\\Workspaces\\metagenome\\test.1.fq"
@@ -232,7 +260,7 @@ if __name__ == '__main__':
     # out_type = 2
     # mistaken_ratio= 0.2
     # min_len = 40
-    total_read_num,clean_read_num,adaptor_read_num = rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio,min_len)
+    total_read_num,clean_read_num,adaptor_read_num = rmAdaptor(type,read1_file,read2_file,adaptor1,adaptor2,out_prefix,out_type,mistaken_ratio,min_len,mistaken_num)
     with open("%s_adaptor_statistical.tsv" % out_prefix,mode="w") as fqout:
         fqout.write("sampleName\ttotal_reads\tremain_reads\tadaptor_reads\n")
         fqout.write("%s\t%s\t%s\t%s\n" % (os.path.basename(out_prefix),total_read_num,clean_read_num,adaptor_read_num))
