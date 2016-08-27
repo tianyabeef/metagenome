@@ -7,6 +7,7 @@ from Bio import SeqIO
 from multiprocessing import Pool
 from multiprocessing import cpu_count
 from time import time
+import math
 
 def read_params(args):
     parser = argparse.ArgumentParser(description='plot alpha rare | v1.0 at 2015/09/28 by liangzb')
@@ -28,8 +29,8 @@ def read_params(args):
                         help="mistaken_ratio defult[3]")
     parser.add_argument('--out_type',dest="out_type",metavar="STRING",type=int,default=4,
                         help="2 : two file out ;  4 : four file out.")
-    parser.add_argument('--min_len',dest="min_len",metavar="min_len",type=int,default=49,
-                        help="min_len[50]")
+    parser.add_argument('--min_len',dest="min_len",metavar="min_len",type=int,default=99,
+                        help="min_len[100]")
     #parser.add_argument('--process',dest='process',metavar="INT",type=int,default=10,
     #                    help = "set process num")
     args = parser.parse_args()
@@ -45,7 +46,7 @@ def get_mistaken_count_max(seq_len,find_pos,adaptor_len,mistaken_ratio,mistaken_
         mistaken_count_max = (seq_len - find_pos) * mistaken_ratio
     if mistaken_count_max<float(mistaken_num):
         mistaken_count_max=mistaken_num
-    return mistaken_count_max
+    return math.ceil(mistaken_count_max)
 
 def match_adaptor(seq,seed):
 #seed_first
@@ -114,7 +115,7 @@ def rmPE(read1,read2,adaptor1,adaptor2,mistaken_ratio,min_len,mistaken_num):
         if res_2[1] is  None:
             return False, None, None
         if res_1[2]>res_2[2]:
-            return False,res_1[1][:res_2[2],res_2[1]]
+            return False,res_1[1][:res_2[2]],res_2[1]
         elif res_1[2]==res_2[2]:
             return False,res_1[1],res_2[1]
         else:
@@ -134,7 +135,7 @@ def rmSE(read,adaptor,mistaken_ratio,min_len,mistaken_num):
         pos = 0
         for j in range(seed_count):
             find_pos = seq.find(seed,pos)
-            mistaken_count_max =get_mistaken_count_max(seq_len, find_pos, adaptor_len, mistaken_ratio, mistaken_num)
+            mistaken_count_max =get_mistaken_count_max(seq_len, (find_pos-i), adaptor_len, mistaken_ratio, mistaken_num)
             mistaken_count = 0
             _b = find_pos
             _e = find_pos + seed_len
