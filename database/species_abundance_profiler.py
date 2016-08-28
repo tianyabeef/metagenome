@@ -47,7 +47,7 @@ if __name__ == '__main__':
     params = read_params(sys.argv)
     match_file = params["match_file"] #解析出来的match文件
     species_abundance = params["species_abundance"] #输出结果
-    #logout = params["log"] #出来log文件
+    logout = params["log"] #出来log文件
     rep = params["rep"] #随机，或所有
     stat = params["stat"] #丰度统计方式
     quantile = params["stat_q"]
@@ -74,7 +74,9 @@ if __name__ == '__main__':
     reads_unique_num = 0
     reads_multip_unispecies_num = 0
     reads_multip_mulspecies_num = 0
-    with open(match_file,"r") as infq , open(species_abundance,"w") as outfq:
+    match_nums = 0
+    with open(match_file,"r") as infq , open(species_abundance,"w") as outfq , open(logout,"w") as logfq:
+        match_nums += 1
         reads_gi = defaultdict(set)
         gi_counter = {}
         abund_str = {}
@@ -163,4 +165,4 @@ if __name__ == '__main__':
         abund_sp = sorted(abund_sp.items(),key = lambda d: d[1])
         for key,value in abund_sp:
             outfq.write("%s\t%s\n"%(key,value/total_abundance))
-
+        logfq.write("sum match is %s\n" % match_nums)

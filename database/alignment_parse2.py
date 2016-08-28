@@ -141,8 +141,9 @@ if __name__ == '__main__':
         df = pd.DataFrame.from_csv(key,header=0,sep=",",index_col=0)
         df_list.append(df)
     df_final = pd.concat(df_list, axis=1)
-    df_final.to_csv(outputfile,sep=",",header=True)
-    df_final.reindex(index=range(len(df_final.index)))
+    df_final2 = df_final.reindex(index=range(len(df_final.index)))
+    df_final2.to_csv(outputfile,sep=",",header=True)
+
     end = time.time()
     sys.stdout.write("concat step run time: %s\n" % (end-start))
 
