@@ -45,6 +45,7 @@ def read_params(args):
 
 
 if __name__ == '__main__':
+    sys.argv = ["test.py", "-i", "test.out", "-o", "test.out2", "-log", "test.log"]
     #sys.argv=["species_py", "-i","test2","-o","test.out","-log","test.log"]
     params = read_params(sys.argv)
     match_file = params["match_file"] #解析出来的match文件
@@ -57,19 +58,19 @@ if __name__ == '__main__':
     strain = {}
     gi_len = {}
     species = {}
-    TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
-    SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
-    for ttax in TAXLIST:
-       with open(ttax,"r") as fq:
-           for line in fq:
-               tabs = line.strip().split("\t")
-               strain[tabs[0]] = tabs[9] #登入号对应物种
-               species[tabs[9]] = tabs[7]
-    for tsize in SIZELIST:
-        with open(tsize,"r") as fq:
-            for line in fq:
-                tabs = line.strip().split("\t")
-                gi_len[tabs[0]] = float(tabs[1]) #gi的长度
+    # TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
+    # SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
+    # for ttax in TAXLIST:
+    #    with open(ttax,"r") as fq:
+    #        for line in fq:
+    #            tabs = line.strip().split("\t")
+    #            strain[tabs[0]] = tabs[9] #登入号对应物种
+    #            species[tabs[9]] = tabs[7]
+    # for tsize in SIZELIST:
+    #     with open(tsize,"r") as fq:
+    #         for line in fq:
+    #             tabs = line.strip().split("\t")
+    #             gi_len[tabs[0]] = float(tabs[1]) #gi的长度
 
     starttime = time.time()
     species_value_unique = {}
@@ -84,10 +85,11 @@ if __name__ == '__main__':
         abund_sp = {}
         for line in infq:
             if line.startswith(","):
+                headline = line.strip().split(",")
                 continue
             match_nums += 1
             tabs = line.strip().split(",")
-            if len(tabs)!=68:
+            if len(tabs)!=len(headline):
                 raise TypeError("err tabs num in %s file"%match_file)
             query = tabs.pop(0)#reads编号
             hits=[]
@@ -135,16 +137,18 @@ if __name__ == '__main__':
                             besthits.append((n,tread))
                     else:
                         sys.stderr.write("min_s max statistical error")
-                if besthit_b_num >= besthit_a_num:
-                    for n,tread in besthits:
-                        if tread=="b":
-                            reads_gi[strain[n]].add(n)
-                            gi_counter[n] = float(gi_counter[n])+float(1/besthit_b_num) if n in gi_counter else 1
-                else:
-                    for n,tread in besthits:
-                        if tread=="a":
-                            reads_gi[strain[n]].add(n)
-                            gi_counter[n] = float(gi_counter[n])+float(1/besthit_a_num) if n in gi_counter else 1
+            elif rep==1:
+                besthits = besthits[0]
+            if besthit_b_num >= besthit_a_num:
+                for n,tread in besthits:
+                    if tread=="b":
+                        reads_gi[strain[n]].add(n)
+                        gi_counter[n] = float(gi_counter[n])+float(1/besthit_b_num) if n in gi_counter else float(1/besthit_b_num)
+            else:
+                for n,tread in besthits:
+                    if tread=="a":
+                        reads_gi[strain[n]].add(n)
+                        gi_counter[n] = float(gi_counter[n])+float(1/besthit_a_num) if n in gi_counter else float(1/besthit_a_num)
         for key,value in reads_gi.items():
             quant = int(quantile*len(reads_gi[key]))
             ql,qr,qn = (quant,-quant,quant) if quant else (None,None,0)
