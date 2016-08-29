@@ -33,30 +33,32 @@ def read_pe(pe):
     pkl_list = []
     for key in  pe:
         inf = {}
+        judgere = {}
         start = time.time()
         with open(key, "r") as fq:
             stringname = os.path.basename(os.path.splitext(key)[0])
             sys.stdout.write("running  %s\n" % stringname)
             for line in fq:
                 tabs = line.strip().split("\t")
-                query = tabs[0]
+                orgquery = tabs[0]
+                query = orgquery[:-2]
                 try:
                     refer = tabs[7]
                 except IndexError:
                     sys.stderr.write("%s no have tabs[7]%s split %s\n" % (key,line,tabs))
                     continue
                 flag = tabs[4]
-                if flag == "a":
-                    outstring = "%s\t%s\t%s" % (refer, tabs[-2], tabs[9])
+                #if flag == "b":
+                if judgere.has_key("%s_%s_%s"%(stringname,orgquery,refer)):
+                    continue
+                else:
+                    outstring = "%s\t%s\t%s\t%s" % (refer,tabs[-2],tabs[9],flag)
                     if inf.has_key(query):
-                        inf[query] = "%s,%s" % (outstring, inf[query])
+                        inf[query] = "%s;:%s" % (outstring, inf[query])
                     else:
                         inf[query] = outstring
-        # if index==0:
-        #     df_first = pd.DataFrame(inf,index=[stringname]).T
-        # else:
-        #     df = pd.DataFrame(inf,index=[stringname]).T
-        #     df_first = pd.concat([df_first,df], axis=1)
+                    judgere["%s_%s_%s"%(stringname,orgquery,refer)]=1
+
         if inf:
             df = pd.DataFrame(inf,index=[stringname]).T
             df.to_csv("%s.pkl" % key,sep=",",header=True)
@@ -80,7 +82,7 @@ def read_se(se,pkl_list):
                 query = tabs[0]
                 refer = tabs[7]
                 flag = tabs[4]
-                if flag=="a":
+                if flag=="b":
                     outstring = "%s\tS\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
                     if inf.has_key(query):
                         inf[query] = "%s,%s" % (outstring, inf[query])
@@ -141,8 +143,8 @@ if __name__ == '__main__':
         df = pd.DataFrame.from_csv(key,header=0,sep=",",index_col=0)
         df_list.append(df)
     df_final = pd.concat(df_list, axis=1)
-    df_final2 = df_final.reindex(index=range(len(df_final.index)))
-    df_final2.to_csv(outputfile,sep=",",header=True)
+    df_final.index = range(len(df_final.index))
+    df_final.to_csv(outputfile,sep=",",header=True)
 
     end = time.time()
     sys.stdout.write("concat step run time: %s\n" % (end-start))

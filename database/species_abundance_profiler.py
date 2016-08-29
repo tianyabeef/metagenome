@@ -43,7 +43,9 @@ def read_params(args):
     params = vars(args)
     return params
 
+
 if __name__ == '__main__':
+    #sys.argv=["species_py", "-i","test2","-o","test.out","-log","test.log"]
     params = read_params(sys.argv)
     match_file = params["match_file"] #解析出来的match文件
     species_abundance = params["species_abundance"] #输出结果
@@ -58,11 +60,11 @@ if __name__ == '__main__':
     TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
     SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
     for ttax in TAXLIST:
-        with open(ttax,"r") as fq:
-            for line in fq:
-                tabs = line.strip().split("\t")
-                strain[tabs[0]] = tabs[9] #登入号对应物种
-                species[tabs[9]] = tabs[7]
+       with open(ttax,"r") as fq:
+           for line in fq:
+               tabs = line.strip().split("\t")
+               strain[tabs[0]] = tabs[9] #登入号对应物种
+               species[tabs[9]] = tabs[7]
     for tsize in SIZELIST:
         with open(tsize,"r") as fq:
             for line in fq:
@@ -76,7 +78,6 @@ if __name__ == '__main__':
     reads_multip_mulspecies_num = 0
     match_nums = 0
     with open(match_file,"r") as infq , open(species_abundance,"w") as outfq , open(logout,"w") as logfq:
-        match_nums += 1
         reads_gi = defaultdict(set)
         gi_counter = {}
         abund_str = {}
@@ -84,44 +85,66 @@ if __name__ == '__main__':
         for line in infq:
             if line.startswith(","):
                 continue
+            match_nums += 1
             tabs = line.strip().split(",")
+            if len(tabs)!=68:
+                raise TypeError("err tabs num in %s file"%match_file)
             query = tabs.pop(0)#reads编号
             hits=[]
             for key in tabs:
                 if not key:
                     continue
-                chot = key.strip().strip("\"").split("\t")
-                chot[1]=int(chot[1].strip('M'))
-                #if ( ( (chot[1] == "P") and (chot[3] == "b") ) or (chot[1] == "S")):
-                #    sys.stdout.write("warning hava s or P b\n")
+                #if key.find("\""):
+                subtabs = key.strip().strip("\"").split(";:")
+                for subkey in  subtabs:
+                    subchot = subkey.strip().split("\t")
+                    subchot[1]=int(subchot[1].strip('M'))
+                    if min_alignment_len==None or min_alignment_len<subchot[1]:
+                        hits.append((subchot[0],subchot[1],subchot[2],subchot[3]))
+                    else:
+                        sys.stderr.write("align match length is %s < %s "%(subchot[1],min_alignment_len))
+                        continue
                 #else:
-                if min_alignment_len==None or min_alignment_len<chot[1]:
-                    hits.append((chot[0],chot[1],chot[2]))
-                else:
-                    sys.stderr.write("align match length is %s < %s "%(chot[1],min_alignment_len))
-                    continue
+                #    raise TypeError("no have \" file!")
+                    #chot = key.strip().split("\t")
+                    #chot[1]=int(chot[1].strip('M'))
+                    #if min_alignment_len==None or min_alignment_len<chot[1]:
+                        #hit[chot[3]].append(chot[3])
+                        #hit[chot[3]].append(chot[1])
+                        #hit[chot[3]].append(chot[2])
+                        #hits.append(hit[chot[3]])
+                    #else:
+                        #sys.stderr.write("align match length is %s < %s "%(chot[1],min_alignment_len))
+                        #continue
             hits = sorted(hits,key=lambda x: (-x[1], x[2]))
             max_M = hits[0][1]
             min_s = hits[0][2]
-            strainName = strain[hits[0][0]]
-            gi_counter[hits[0][0]]= int(gi_counter[hits[0][0]])+1 if hits[0][0] in gi_counter else 1
-            reads_gi[strainName].add(hits[0][0])
-
+            besthit_a_num =0
+            besthit_b_num = 0
+            besthits = []
             if rep==2:
-                for n,M,s in hits[1:]:
-                    if M<max_M:
+                for n,M,s,tread in hits:
+                    if M<max_M or s>min_s:
                         continue
-                    if M==max_M:
-                        if s==min_s:
+                    elif M==max_M and s==min_s:
+                        if tread == "a":
+                            besthit_a_num += 1
+                            besthits.append((n,tread))
+                        else:
+                            besthit_b_num += 1
+                            besthits.append((n,tread))
+                    else:
+                        sys.stderr.write("min_s max statistical error")
+                if besthit_b_num >= besthit_a_num:
+                    for n,tread in besthits:
+                        if tread=="b":
                             reads_gi[strain[n]].add(n)
-                            gi_counter[n] = int(gi_counter[n])+1 if n in gi_counter else 1
-                        elif s>min_s:
-                            continue
-                        elif s<min_s:
-                            sys.stderr.write("min_s statistical error")
-                    if M>max_M:
-                        sys.stderr.write("max_M  statistical error")
-
+                            gi_counter[n] = float(gi_counter[n])+float(1/besthit_b_num) if n in gi_counter else 1
+                else:
+                    for n,tread in besthits:
+                        if tread=="a":
+                            reads_gi[strain[n]].add(n)
+                            gi_counter[n] = float(gi_counter[n])+float(1/besthit_a_num) if n in gi_counter else 1
         for key,value in reads_gi.items():
             quant = int(quantile*len(reads_gi[key]))
             ql,qr,qn = (quant,-quant,quant) if quant else (None,None,0)
@@ -165,4 +188,5 @@ if __name__ == '__main__':
         abund_sp = sorted(abund_sp.items(),key = lambda d: d[1])
         for key,value in abund_sp:
             outfq.write("%s\t%s\n"%(key,value/total_abundance))
-        logfq.write("sum match is %s\n" % match_nums)
+        endtime = time.time()
+        logfq.write("sum match is %s\nuse time is %s second" % (match_nums,(endtime-starttime)))
