@@ -45,7 +45,7 @@ def read_params(args):
 
 
 if __name__ == '__main__':
-    sys.argv = ["test.py", "-i", "test.out", "-o", "test.out2", "-log", "test.log"]
+    #sys.argv = ["test.py", "-i", "test.out", "-o", "test.out2", "-log", "test.log"]
     #sys.argv=["species_py", "-i","test2","-o","test.out","-log","test.log"]
     params = read_params(sys.argv)
     match_file = params["match_file"] #解析出来的match文件
@@ -58,19 +58,19 @@ if __name__ == '__main__':
     strain = {}
     gi_len = {}
     species = {}
-    # TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
-    # SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
-    # for ttax in TAXLIST:
-    #    with open(ttax,"r") as fq:
-    #        for line in fq:
-    #            tabs = line.strip().split("\t")
-    #            strain[tabs[0]] = tabs[9] #登入号对应物种
-    #            species[tabs[9]] = tabs[7]
-    # for tsize in SIZELIST:
-    #     with open(tsize,"r") as fq:
-    #         for line in fq:
-    #             tabs = line.strip().split("\t")
-    #             gi_len[tabs[0]] = float(tabs[1]) #gi的长度
+    TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
+    SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
+    for ttax in TAXLIST:
+       with open(ttax,"r") as fq:
+           for line in fq:
+               tabs = line.strip().split("\t")
+               strain[tabs[0]] = tabs[9] #登入号对应物种
+               species[tabs[9]] = tabs[7]
+    for tsize in SIZELIST:
+        with open(tsize,"r") as fq:
+            for line in fq:
+                tabs = line.strip().split("\t")
+                gi_len[tabs[0]] = float(tabs[1]) #gi的长度
 
     starttime = time.time()
     species_value_unique = {}
@@ -191,6 +191,7 @@ if __name__ == '__main__':
         total_abundance = float(df.sum(axis=1))
         abund_sp = sorted(abund_sp.items(),key = lambda d: d[1])
         for key,value in abund_sp:
-            outfq.write("%s\t%s\n"%(key,value/total_abundance))
+            if value!=0:
+                outfq.write("%s\t%s\n"%(key,value/total_abundance))
         endtime = time.time()
         logfq.write("sum match is %s\nuse time is %s second" % (match_nums,(endtime-starttime)))

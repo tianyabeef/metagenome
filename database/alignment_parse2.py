@@ -49,11 +49,11 @@ def read_pe(pe):
                     continue
                 flag = tabs[4]
                 #if flag == "b":
-                if judgere.has_key("%s_%s_%s"%(stringname,orgquery,refer)):
+                if "%s_%s_%s"%(stringname,orgquery,refer) in judgere:
                     continue
                 else:
                     outstring = "%s\t%s\t%s\t%s" % (refer,tabs[-2],tabs[9],flag)
-                    if inf.has_key(query):
+                    if query in inf:
                         inf[query] = "%s;:%s" % (outstring, inf[query])
                     else:
                         inf[query] = outstring
@@ -84,7 +84,7 @@ def read_se(se,pkl_list):
                 flag = tabs[4]
                 if flag=="b":
                     outstring = "%s\tS\t%s\t%s\t%s\t%s" % (refer, stringname, flag, tabs[-2], tabs[9])
-                    if inf.has_key(query):
+                    if query in inf:
                         inf[query] = "%s,%s" % (outstring, inf[query])
                     else:
                         inf[query] = outstring
