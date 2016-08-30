@@ -60,6 +60,33 @@ def read_pe(pe):
                     judgere["%s_%s_%s"%(stringname,orgquery,refer)]=1
 
         if inf:
+            for k,value in inf:
+                tabs = value.split(";:")
+                if len(tabs)<5:
+                    continue
+                hits = []
+                for v in  tabs:
+                    subchot = v.split("\t")
+                    hits.append((subchot[0],subchot[1],subchot[2],subchot[3]))
+                hits = sorted(hits, key=lambda x: (-x[1], x[2]))
+                max_M = hits[0][1]
+                min_s = hits[0][2]
+                besthits = []
+                for n, M, s, tread in hits:
+                    if M < max_M or s > min_s:
+                        continue
+                    elif M == max_M and s == min_s:
+                        if tread == "a":
+                            besthits.append((n, tread))
+                        else:
+                            besthits.append((n, tread))
+                    else:
+                        sys.stderr.write("min_s max statistical error")
+                outstring=[]
+                for n,M,s,tread in besthits:
+                    outstring.append("%s\t%s\t%s\t%s"%(n,M,s,tread))
+                inf[k] = ";:".join(outstring)
+
             df = pd.DataFrame(inf,index=[stringname]).T
             df.to_csv("%s.pkl" % key,sep=",",header=True)
             pkl_list.append("%s.pkl" % key)
