@@ -57,6 +57,7 @@ if __name__ == '__main__':
     min_alignment_len = params["min_alignment_len"]
     strain = {}
     gi_len = {}
+    strain_len = {}
     species = {}
     TAXLIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.TAX","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.TAX","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.TAX","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.TAX"]
     SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
@@ -71,6 +72,7 @@ if __name__ == '__main__':
             for line in fq:
                 tabs = line.strip().split("\t")
                 gi_len[tabs[0]] = float(tabs[1]) #gi的长度
+                strain_len[tabs[0]] = float(tabs[2]) #strain的长度
 
     starttime = time.time()
     species_value_unique = {}
@@ -143,12 +145,12 @@ if __name__ == '__main__':
                 for n,tread in besthits:
                     if tread=="b":
                         reads_gi[strain[n]].add(n)
-                        gi_counter[n] = float(gi_counter[n])+float(1/besthit_b_num) if n in gi_counter else float(1/besthit_b_num)
+                        gi_counter[n] = float(gi_counter[n])+1/float(besthit_b_num) if n in gi_counter else 1/float(besthit_b_num)
             else:
                 for n,tread in besthits:
                     if tread=="a":
                         reads_gi[strain[n]].add(n)
-                        gi_counter[n] = float(gi_counter[n])+float(1/besthit_a_num) if n in gi_counter else float(1/besthit_a_num)
+                        gi_counter[n] = float(gi_counter[n])+1/float(besthit_a_num) if n in gi_counter else 1/float(besthit_a_num)
         for key,value in reads_gi.items():
             quant = int(quantile*len(reads_gi[key]))
             ql,qr,qn = (quant,-quant,quant) if quant else (None,None,0)
