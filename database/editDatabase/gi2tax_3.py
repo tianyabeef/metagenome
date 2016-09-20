@@ -19,7 +19,7 @@ if __name__ == '__main__':
         fq.next()
         for line in fq:
             tabs = line.strip().split("\t")
-            taxids_info[tabs[7]] = line.strip()
+            taxids_info[tabs[8]] = line.strip()
     strain_species_taxid={}
     with open(assembly_summary,"r") as fq:
         for line in fq:
@@ -27,7 +27,7 @@ if __name__ == '__main__':
                 tabs = line.strip().split("\t")
                 try:
                     ftp_split = tabs[19].split("/")
-                    strain_species_taxid[ftp_split[-1]] =tabs[6]
+                    strain_species_taxid[ftp_split[-1]] =tabs[0]
                 except Exception,e:
                     sys.stderr.write(Exception,":",e)
     with open("%s/statistical.txt" % outpathori,"w") as haveout:

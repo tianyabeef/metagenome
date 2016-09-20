@@ -77,10 +77,6 @@ if __name__ == '__main__':
                 strain_len[tabs[0]] = float(tabs[2]) #strain的长度
 
     starttime = time.time()
-    # species_value_unique = {}
-    # reads_unique_num = 0
-    # reads_multip_unispecies_num = 0
-    # reads_multip_mulspecies_num = 0
     match_nums = 0
     with open(match_file,"r") as infq , open(species_abundance,"w") as outfq , open(logout,"w") as logfq:
         reads_gi = defaultdict(set)
@@ -140,7 +136,7 @@ if __name__ == '__main__':
             for gi in strain_gi[key]:
                 if gi not in value:
                     le = float(gi_len[gi])
-                    rat_nreads.append((le,0))
+                    rat_nreads.append(le,0)
             rat_nreads = sorted(rat_nreads, key = lambda x: x[1])
             rat_v,nreads_v = zip(*rat_nreads) if rat_nreads else sys.stderr.write("rat_nreads statical err")
             try:
@@ -182,4 +178,3 @@ if __name__ == '__main__':
         endtime = time.time()
         logfq.write("sum match is %s\nuse time is %s second\n" % (match_nums,(endtime-starttime)))
         logfq.write("total_abundance:%s"%total_abundance)
-

@@ -6,7 +6,7 @@ __version__ = "1.0.0-dev"
 import  argparse
 import sys
 import re
-TAXLIST=["/data_center_06/Database/GENOMEall.txt"]
+TAXLIST=["/data_center_06/Database/GENOMEall_20160826.txt"]
 def read_params(args):
     parser = argparse.ArgumentParser(description='group file change')
     parser.add_argument('-i', '--input', dest='input', metavar='input', type=str, required=True,
@@ -72,6 +72,8 @@ if __name__ == '__main__':
                     for line_abu in fq2:
                         species,abun = line_abu.strip().split("\t")
                         abun = float(abun)
+                        if abun == 0:
+                            continue
                         fqs.write("%s\t%s\n" % (format_taxonomy_name(species,"s"),abun))
                         genus_abun[genus_pro[species]] = genus_abun[genus_pro[species]] + abun if genus_abun.has_key(genus_pro[species]) else abun
                         family_abun[family_pro[species]] = abun + family_abun[family_pro[species]]  if family_abun.has_key(family_pro[species]) else abun

@@ -45,6 +45,7 @@ def taxon(config,sh_default_file,outpath,name):
     commands.append("ls alignment/*/*order.abundance   | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > profile/order.profile")
     commands.append("ls alignment/*/*phylum.abundance  | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > profile/phylum.profile")
     commands.append("ls alignment/*/*all.abundance | /data_center_01/pipeline/huangy/metagenome/perlscript/02_profile - > profile/all.profile")
+    commands.append("python %s/02_top.py -i %s/profile/all.profile -o %s/profile"%(pyscript_dir,work_dir,work_dir))
     commands.append("## use rate")
     commands.append("#mkdir use_rate")
     commands.append("#ls alignment/*/*MATCH |while read a; do echo \"perl /data_center_03/USER/zhongwd/rd/11_taxonomy_V2.0/bin/stat.pl < $a > $a.stat\" ;done > use_rate/stat.sh")
@@ -90,26 +91,28 @@ def taxon(config,sh_default_file,outpath,name):
         mkdir("%s/group/%s"%(work_dir,subgroup_name))
         commands.append("## 01.barplot      need finish")
         mkdir("%s/group/%s/01.barplot"%(work_dir,subgroup_name))
-        commands.append("%s/02_bar_plot.py -i %s/profile/species.profile -o %s/group/%s/01.barplot/species.pdf \
-        -g %s -t %s"%(pyscript_dir,work_dir,work_dir,subgroup_name,subgroup,"species"))
-        commands.append("%s/02_bar_plot.py -i %s/profile/genus.profile -o %s/%s/group/01.barplot/genus.pdf \
-        -g %s -t %s"%(pyscript_dir,work_dir,work_dir,subgroup_name,subgroup,"genus"))
+        commands.append("/data_center_01/pipeline/16S_ITS_pipeline_v3.0/script/02_bar_plot.py -t %s/profile/ -o %s/group/%s/01.barplot/ \
+        -g %s "%(work_dir,work_dir,subgroup_name,subgroup))
+        commands.append("/data_center_01/pipeline/16S_ITS_pipeline_v3.0/script/02_bar_plot.py -t %s/profile/ -o %s/group/%s/01.barplot/ \
+        -g %s --level 7 "%(work_dir,work_dir,subgroup_name,subgroup))
+        #commands.append("%s/02_bar_plot.py -i %s/profile/genus.profile -o %s/group/%s/01.barplot/genus.pdf \
+        #-g %s -t %s"%(pyscript_dir,work_dir,work_dir,subgroup_name,subgroup,"genus"))
         commands.append("## 02.core")
         mkdir("%s/group/%s/02.core"%(work_dir,subgroup_name))
-        commands.append("%s/02_venn.py -i %s/profile/species.profile -o %s/group/%s/02.core/%s/ -g %s "\
+        commands.append("python %s/02_venn.py -i %s/profile/otu_table_L7.txt -o %s/group/%s/02.core/%s/ -g %s "\
                         %(pyscript_dir,work_dir,work_dir,subgroup_name,"species",subgroup))
-        commands.append("%s/02_venn.py -i %s/profile/species.profile -o %s/group/%s/02.core/%s/ -g %s "\
+        commands.append("python %s/02_venn.py -i %s/profile/otu_table_L7.txt -o %s/group/%s/02.core/%s/ -g %s "\
                         %(pyscript_dir,work_dir,work_dir,subgroup_name,"genus",subgroup))
         commands.append("## 05.top_boxplot")
         mkdir("%s/group/%s/05.top_boxplot"%(work_dir,subgroup_name))
         commands.append("cut -f 1 profile/genus.profile   | perl /data_center_03/USER/zhongwd/temp/0106/top/a.pl > 05.top_boxplot/genus.phylum")
         commands.append("cut -f 1 profile/species.profile | perl /data_center_03/USER/zhongwd/temp/0106/top/a.pl > 05.top_boxplot/species.phylum")
-        commands.append("%s/02_top.py -i test -g %s -o %s/group/%s/05.top_boxplot/"%(pyscript_dir,subgroup,work_dir,subgroup_name))
+        commands.append("python %s/02_top.py -i test -g %s -o %s/group/%s/05.top_boxplot/"%(pyscript_dir,subgroup,work_dir,subgroup_name))
         commands.append("## 09.pca")
         mkdir("%s/group/%s/09.pca"%(work_dir,subgroup_name))
-        commands.append("%s/02_otu_pca.py -i %s/profile/species.profile -g %s -o %s/group/%s/09.pca --with_boxplot"%\
+        commands.append("python %s/02_otu_pca.py -i %s/profile/species.profile -g %s -o %s/group/%s/09.pca --with_boxplot"%\
                         (pyscript_dir,work_dir,subgroup,work_dir,subgroup_name))
-        commands.append("%s/02_otu_pca.py -i %s/profile/genus.profile -g %s -o %s/group/%s/09.pca --with_boxplot"%\
+        commands.append("python %s/02_otu_pca.py -i %s/profile/genus.profile -g %s -o %s/group/%s/09.pca --with_boxplot"%\
                         (pyscript_dir,work_dir,subgroup,work_dir,subgroup_name))
         commands.append("## 11.anosim; 13.pcoa; 14.nmds")
         mkdir("%s/group/%s/11-14.beta_div"%(work_dir,subgroup_name))
@@ -118,6 +121,6 @@ def taxon(config,sh_default_file,outpath,name):
         commands.append("cd group/%s/11-14.beta_div/species; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/species.profile -g %s -m bray -r; cd -"%(subgroup_name,subgroup))
         commands.append("cd group/%s/11-14.beta_div/genus; perl /data_center_01/pipeline/huangy/metagenome/perlscript/02_Beta_diversity.pl -p ../../../../profile/genus.profile -g %s -m bray -r; cd -"%(subgroup_name,subgroup))
         mkdir("%s/group/%s/15.LEfSe"%(work_dir,subgroup_name))
-        commands.append("%s/02_LEfSe.py -i %s/profile/species.profile -l /data_center_03/USER/huangy/soft/LEfSe_lzb -g %s -o %s/group/%s/15.LEfSe/ --LDA 2"\
+        commands.append("python %s/02_LEfSe.py -i %s/profile/species.profile -l /data_center_03/USER/huangy/soft/LEfSe_lzb -g %s -o %s/group/%s/15.LEfSe/ --LDA 2"\
                         %(pyscript_dir,work_dir,subgroup,work_dir,subgroup_name))
     return commands

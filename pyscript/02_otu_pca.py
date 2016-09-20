@@ -52,4 +52,4 @@ if __name__ == '__main__':
     r_job.format(vars)
     r_job.write(params['out_dir'] + '/tax_pca.R')
     r_job.run()
-    image_trans(pdf_file, png_file)
+    image_trans(300,pdf_file, png_file)

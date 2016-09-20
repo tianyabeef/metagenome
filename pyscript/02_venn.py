@@ -31,7 +31,7 @@ def read(otu_table_file, sample_in_group, vars):
     otu_num_dict = {}
     otu_count = 1
     for ind, group in enumerate(list(group_names)):
-        vars['group_name%s' % (ind,)] = group
+        vars['group_name%s' % (ind+1,)] = group
         otu_in_group[group] = set()
     with open(otu_table_file) as otu_table:
         head = otu_table.next()

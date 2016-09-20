@@ -49,7 +49,7 @@ if __name__ == '__main__':
     title = params['title']
     data = pd.DataFrame.from_csv(file=inputfile,sep="\t")
     data["sum"] = data.sum(axis=1)
-    data = data.sort_index(by="sum",ascending=False)
+    data = data.sort_values(by="sum",ascending=False)
     del data["sum"]
     data = data.ix[:top]
     data.to_csv("%s/for_plot.csv"%dirname,sep="\t")
@@ -64,4 +64,4 @@ if __name__ == '__main__':
     r_job.format(vars)
     r_job.write("%s/bar_plot.R"%dirname)
     r_job.run()
-    image_trans(300,"%s/%s/.pdf"%(dirname,filename),"%s/%s/.png"%(dirname,filename))
+    image_trans(300,"%s/%s.pdf"%(dirname,filename),"%s/%s.png"%(dirname,filename))
