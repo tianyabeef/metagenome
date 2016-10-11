@@ -82,13 +82,13 @@ if __name__ == '__main__':
                         phylum_abun[phylum_pro[species]] = abun + phylum_abun[phylum_pro[species]] if phylum_abun.has_key(phylum_pro[species]) else abun
                         king_abun[king_pro[species]] = abun + king_abun[king_pro[species]] if king_abun.has_key(king_pro[species]) else abun
 
-                        fqall.write("%s|%s|%s|%s|%s|%s|%s\t%s\n" % (format_taxonomy_name(king_pro[species],"k"),\
-                                                                    format_taxonomy_name(phylum_pro[species],"p"),\
-                                                                    format_taxonomy_name(class_pro[species],"c"),\
-                                                                 format_taxonomy_name(order_pro[species],"o"),\
-                                                                    format_taxonomy_name(family_pro[species],"f"),\
-                                                                format_taxonomy_name(genus_pro[species],"g"),\
-                                                                 format_taxonomy_name(species,"s"),abun))
+                        #fqall.write("%s|%s|%s|%s|%s|%s|%s\t%s\n" % (format_taxonomy_name(king_pro[species],"k"),\
+                        #                                            format_taxonomy_name(phylum_pro[species],"p"),\
+                        #                                            format_taxonomy_name(class_pro[species],"c"),\
+                        #                                         format_taxonomy_name(order_pro[species],"o"),\
+                        #                                            format_taxonomy_name(family_pro[species],"f"),\
+                        #                                        format_taxonomy_name(genus_pro[species],"g"),\
+                        #                                         format_taxonomy_name(species,"s"),abun))
                 with open("%s.king.abundance" % name,"w") as fqw:
                     for key,value in king_abun.items():
                         fqw.write("%s\t%s\n" % (format_taxonomy_name(key,"k"),value))
@@ -121,3 +121,17 @@ if __name__ == '__main__':
                         fqall.write("%s|%s|%s|%s|%s|%s\t%s\n" % (format_taxonomy_name(taxanomy2[key][0],"k"),format_taxonomy_name(taxanomy2[key][1],"p"),\
                                                                  format_taxonomy_name(taxanomy2[key][2],"c"),format_taxonomy_name(taxanomy2[key][3],"o"),\
                                                                  format_taxonomy_name(taxanomy2[key][4],"f"),format_taxonomy_name(key,"g"),value))
+
+                with open(line.strip(),"r") as fq2:
+                    for line_abu in fq2:
+                            species,abun = line_abu.strip().split("\t")
+                            abun = float(abun)
+                            if abun == 0:
+                                continue
+                            fqall.write("%s|%s|%s|%s|%s|%s|%s\t%s\n" % (format_taxonomy_name(king_pro[species],"k"),\
+                                                                        format_taxonomy_name(phylum_pro[species],"p"),\
+                                                                        format_taxonomy_name(class_pro[species],"c"),\
+                                                                     format_taxonomy_name(order_pro[species],"o"),\
+                                                                        format_taxonomy_name(family_pro[species],"f"),\
+                                                                    format_taxonomy_name(genus_pro[species],"g"),\
+                                                                     format_taxonomy_name(species,"s"),abun))
