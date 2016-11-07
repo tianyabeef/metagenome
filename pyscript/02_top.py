@@ -31,7 +31,8 @@ if __name__ == '__main__':
 
 
     vars = {'group': group,
-            'pdfoutput':pdfoutput
+            'pdfoutput':pdfoutput,
+            "input":inputfile
             }
     r_job = Rparser()
     r_job.open(const.Rscript + '02_top.R')

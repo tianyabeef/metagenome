@@ -4,19 +4,16 @@ __author__ = "huangy"
 __copyright__ = "Copyright 2016, The metagenome Project"
 __version__ = "1.0.0-dev"
 
-
-from matplotlib import pylab
-#pylab.figure().add_subplot.legend
-#pylab.figure().subplots_adjust
+import time
 import argparse
-import os
 import sys
+
 from workflow.util import configparserself
 from workflow.util import error
+print("import error :%s s"%time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 from workflow.node import Node
-#from workflow.configObj import ConfigObj
+print("import Node :%s s"%time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
 from workflow.util.globals import const
-
 
 def read_params(args):
     parsers = argparse.ArgumentParser(description='''The initial run script of metagene ''')
@@ -27,6 +24,7 @@ def read_params(args):
 
 
 if __name__ == '__main__':
+    print("start :%s s"%time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
     config_default_dir = const.config_default_dir
     step_names_order = const.step_names_order
     params = read_params(sys.argv)
@@ -41,9 +39,11 @@ if __name__ == '__main__':
     steps = []
     for i,name in enumerate(step_names):
         if name in step_names_all:
+            print("end mkdir :%s s"%time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time())))
             step_dir = "%s/%s/" % (work_dir,name)
             step1 = Node(name, path=step_dir)
             step1.mkdir()
+
             opts = []
             if i>0:
                 opts = step1.getconfig(work_dir,step_names[i-1])

@@ -6,6 +6,7 @@ import pandas as pd
 import time
 from collections import defaultdict
 import numpy as np
+import os
 def read_params(args):
     parser = argparse.ArgumentParser(description='''species abundance profile ''')
     stat_choices = ['avg_g','avg_l','tavg_g','tavg_l','wavg_g','wavg_l','med']
@@ -38,7 +39,8 @@ def read_params(args):
          "The sam records for aligned reads with the longest subalignment\n"
          "length smaller than this threshold will be discarded.\n"
          "[default None]\n"   )
-
+    parser.add_argument('--strain_abundance',dest='strain_abundance', action = 'store_true',default=False,
+         help="add put out strain abundance")
     args = parser.parse_args()
     params = vars(args)
     return params
@@ -56,6 +58,10 @@ if __name__ == '__main__':
     quantile = params["stat_q"]
     min_alignment_len = params["min_alignment_len"]
     strain = {}
+    B_strain = {}
+    A_strain = {}
+    F_strain = {}
+    V_strain = {}
     species = {}
     strain_gi=defaultdict(set)
     gi_len = {}
@@ -64,11 +70,34 @@ if __name__ == '__main__':
     SIZELIST=["/data_center_06/Database/NCBI_Bacteria/20160825/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Archaea/20160525/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Fungi/20160601/accession/GENOME.SIZE","/data_center_06/Database/NCBI_Virus/20160615/accession/GENOME.SIZE"]
     for ttax in TAXLIST:
        with open(ttax,"r") as fq:
-           for line in fq:
-               tabs = line.strip().split("\t")
-               strain[tabs[0]] = tabs[9] #登入号对应物种
-               species[tabs[9]] = tabs[7]
-               strain_gi[tabs[9]].add(tabs[0])
+           if ttax.find("Bacteria")>0:
+               for line in fq:
+                   tabs = line.strip().split("\t")
+                   B_strain[tabs[0]] = tabs[9]
+                   strain[tabs[0]] = tabs[9] #登入号对应物种
+                   species[tabs[9]] = tabs[7]
+                   strain_gi[tabs[9]].add(tabs[0])
+           if ttax.find("Archaea")>0:
+               for line in fq:
+                   tabs = line.strip().split("\t")
+                   A_strain[tabs[0]] = tabs[9]
+                   strain[tabs[0]] = tabs[9] #登入号对应物种
+                   species[tabs[9]] = tabs[7]
+                   strain_gi[tabs[9]].add(tabs[0])
+           if ttax.find("Fungi")>0:
+               for line in fq:
+                   tabs = line.strip().split("\t")
+                   F_strain[tabs[0]] = tabs[9]
+                   strain[tabs[0]] = tabs[9] #登入号对应物种
+                   species[tabs[9]] = tabs[7]
+                   strain_gi[tabs[9]].add(tabs[0])
+           if ttax.find("Virus")>0:
+               for line in fq:
+                   tabs = line.strip().split("\t")
+                   V_strain[tabs[0]] = tabs[9]
+                   strain[tabs[0]] = tabs[9] #登入号对应物种
+                   species[tabs[9]] = tabs[7]
+                   strain_gi[tabs[9]].add(tabs[0])
     for tsize in SIZELIST:
         with open(tsize,"r") as fq:
             for line in fq:
@@ -81,7 +110,10 @@ if __name__ == '__main__':
     # reads_unique_num = 0
     # reads_multip_unispecies_num = 0
     # reads_multip_mulspecies_num = 0
-    match_nums = 0
+    B_match_nums = 0
+    A_match_nums = 0
+    F_match_nums = 0
+    V_match_nums = 0
     with open(match_file,"r") as infq , open(species_abundance,"w") as outfq , open(logout,"w") as logfq:
         reads_gi = defaultdict(set)
         gi_counter = {}
@@ -91,7 +123,6 @@ if __name__ == '__main__':
             if line.startswith(","):
                 headline = line.strip().split(",")
                 continue
-            match_nums += 1
             tabs = line.strip().split(",")
             if len(tabs)!=len(headline):
                 raise TypeError("err tabs num in %s file"%match_file)
@@ -127,6 +158,14 @@ if __name__ == '__main__':
             elif rep==1:
                 besthits = besthits[0]
             for n in besthits:
+                if B_strain.has_key(n):
+                    B_match_nums += 1/float(besthit_num)
+                if A_strain.has_key(n):
+                    A_match_nums += 1/float(besthit_num)
+                if F_strain.has_key(n):
+                    F_match_nums += 1/float(besthit_num)
+                if V_strain.has_key(n):
+                    V_match_nums += 1/float(besthit_num)
                 reads_gi[strain[n]].add(n)
                 gi_counter[n] = float(gi_counter[n])+1/float(besthit_num) if n in gi_counter else 1/float(besthit_num)
         for key,value in reads_gi.items():
@@ -170,6 +209,8 @@ if __name__ == '__main__':
                 loc_ab = np.median(sorted([float(n)/r for r,n in rat_nreads])[ql:qr])
             abund_str[key] = loc_ab
         for key,value in abund_str.items():
+	    if key=="GCA_000774955.1" or key=="GCA_000774945.1" or key=="GCA_000774975.1" or key=="GCA_000770565.1" or key=="GCA_000827875.1" or key=="GCA_000757255.1" or key=="GCA_000763555.1" or key=="GCA_001563765.1" or key=="GCA_001461825.1" or key=="GCA_001461835.1" or key=="GCA_001461845.1" or key=="GCA_001521815.1" :
+                continue
             abund_sp[species[key]] = abund_sp[species[key]]+value if species[key] in abund_sp else value
         df = pd.DataFrame(abund_sp,index=["a"])
         total_abundance = float(df.sum(axis=1))
@@ -180,6 +221,14 @@ if __name__ == '__main__':
             else:
                 logfq.write("%s\t%s\tabundance is zero\n"%(key,value))
         endtime = time.time()
-        logfq.write("sum match is %s\nuse time is %s second\n" % (match_nums,(endtime-starttime)))
+        logfq.write("matchs\tBacteria\tArchaea\tFungi\tVirus\n%s\t%s\t%s\t%s\nuse time is %s second\n" % (B_match_nums,A_match_nums,F_match_nums,V_match_nums,(endtime-starttime)))
         logfq.write("total_abundance:%s"%total_abundance)
-
+        if params['strain_abundance']:
+            try:
+                sname = os.path.basename(species_abundance).split("\.")[0]
+            except Exception,e:
+                print "%s file name need XXX.species.abundance"%species_abundance
+            strain_abundance = "%s/%s.strain.abundance"%(os.path.dirname(species_abundance),sname)
+            with open(strain_abundance,"w") as outfq:
+                for key,value in abund_str.items():
+                    outfq.write("%s\t%s\n"%(key,value/total_abundance))
