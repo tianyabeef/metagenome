@@ -55,7 +55,7 @@ def read_pe(pe):
                     sys.stderr.write("%s no have tabs[7]%s split %s\n" % (key,line,tabs))
                     continue
                 # flag = tabs[4]
-                outstring = "%s\t%s\t%s\t%s\t%s" % (refer,tabs[-2],tabs[9],tabs[8])
+                outstring = "%s\t%s\t%s\t%s" % (refer,tabs[-2],tabs[9],tabs[8])
                 if query in inf:
                     inf[query] = "%s;:%s" % (outstring, inf[query])
                 else:
@@ -88,7 +88,7 @@ def read_pe(pe):
                         sys.stderr.write("min_s max statistical error")
                 outstring=[]
                 for n, M, s ,astart,bstart,blen in besthits:
-                    outstring.append("%s\t%s\t%s\t%s\t%s\t%s"%(n,M,s,astart,bstart,blen))
+                    outstring.append("%s\t%s\t%s\t%s\t%s"%(n,M,s,astart,bstart))
                 inf[k] = ";:".join(outstring)
 
             df = pd.DataFrame(inf,index=[stringname]).T

@@ -140,7 +140,7 @@ if __name__ == '__main__':
                     subchot[1]=int(subchot[1].strip('M'))
                     if min_alignment_len==None or min_alignment_len<subchot[1]:
                         #0:IDxxx  1:150M  2:mismatchsum 3:stata 4:startb ,5:blen
-                        hits.append((subchot[0],subchot[1],subchot[2],subchot[3],subchot[4],subchot[5]))
+                        hits.append((subchot[0],subchot[1],subchot[2],subchot[3],subchot[4]))
                     else:
                         sys.stderr.write("align match length is %s < %s "%(subchot[1],min_alignment_len))
                         continue
@@ -150,18 +150,18 @@ if __name__ == '__main__':
             besthit_num = 0
             besthits = []
             if rep==2:
-                for n,M,s,astart,bstart,blen in hits:
+                for n,M,s,astart,bstart in hits:
                     if M<max_M or s>min_s:
                         continue
                     elif M==max_M and s==min_s:
                         besthit_num += 1
-                        besthits.append((n,astart,bstart,M,blen))
+                        besthits.append((n,astart,bstart,M))
                     else:
                         sys.stderr.write("min_s max statistical error")
             elif rep==1:
                 besthits = besthits[0]
             for tempn in besthits:
-                n,astart,bstart,alen,blen = tempn
+                n,astart,bstart,alen = tempn
                 if B_strain.has_key(n):
                     B_match_nums += 1/float(besthit_num)
                 if A_strain.has_key(n):
@@ -172,9 +172,9 @@ if __name__ == '__main__':
                     V_match_nums += 1/float(besthit_num)
                 reads_gi[strain[n]].add(n)
                 gi_counter[n] = float(gi_counter[n])+1/float(besthit_num) if n in gi_counter else 1/float(besthit_num)
-                for v in range(start=astart,stop=int(alen+astart)):
+                for v in range(int(astart),int(int(alen)+int(astart))):
                     gi_bases[n].add(v)
-                for v in range(start=bstart,stop=int(blen+bstart)):
+                for v in range(int(bstart),int(int(alen)+int(bstart))):
                     gi_bases[n].add(v)
         for key,value in reads_gi.items():
             quant = int(quantile*len(reads_gi[key]))
@@ -224,7 +224,7 @@ if __name__ == '__main__':
                 continue
             abund_sp[species[key]] = abund_sp[species[key]]+value if species[key] in abund_sp else value
         for key,value in cover_str.items():
-            cover_sp_temp[species[key]] = cover_sp_temp[species[key]].add(value)
+            cover_sp_temp[species[key]].add(value)
         for key,value in cover_sp_temp.items():
             cover_sp[key] = float(sum(value))/len(value)
 
@@ -234,11 +234,12 @@ if __name__ == '__main__':
         for key,value in abund_sp:
             if value!=0:
                 outfq.write("%s\t%s\n"%(key,value/total_abundance))
+                outfqcoverage.write("%s\t%s\n"%(key,cover_sp[key]))
             else:
                 logfq.write("%s\t%s\tabundance is zero\n"%(key,value))
-        for key,valus in cover_sp:
-            if value!=0:
-                outfqcoverage.write("%s\t%s\n"%(key,value))
+        #for key,value in cover_sp.items():
+        #    if value!=0:
+                
         endtime = time.time()
         logfq.write("matchs\tBacteria\tArchaea\tFungi\tVirus\n%s\t%s\t%s\t%s\nuse time is %s second\n" % (B_match_nums,A_match_nums,F_match_nums,V_match_nums,(endtime-starttime)))
         logfq.write("total_abundance:%s"%total_abundance)
