@@ -119,8 +119,15 @@ if __name__ == '__main__':
         gi_bases = defaultdict(set)
         abund_str = {}
         cover_str = {}#converages of strain
+        strain_statistical_len ={} #statistical len of strain
+        strain_statistical_reads = {} #statistical the num of reads in strain
         abund_sp = {}
-        cover_sp_temp = defaultdict(set)
+        cover_sp_temp = defaultdict(list)
+        sp_statistical_len =defaultdict(list)
+        sp_statistical_reads = defaultdict(list)
+        sp_statistical_reads_single = defaultdict(list)
+        strain_reads = {}
+        strain_reads_single ={}
         cover_sp = {} # converages of species
         for line in infq:
             if line.startswith(","):
@@ -176,6 +183,11 @@ if __name__ == '__main__':
                     gi_bases[n].add(v)
                 for v in range(int(bstart),int(int(alen)+int(bstart))):
                     gi_bases[n].add(v)
+                strain_reads[strain[n]]= strain_reads[strain[n]]+1 if strain[n] in strain_reads else 1
+                if besthit_num==1:
+                    strain_reads_single[strain[n]] = strain_reads_single[strain[n]]+1 if strain[n] in strain_reads_single else 1
+                else:
+                    strain_reads_single[strain[n]] = 0
         for key,value in reads_gi.items():
             quant = int(quantile*len(reads_gi[key]))
             ql,qr,qn = (quant,-quant,quant) if quant else (None,None,0)
@@ -219,12 +231,17 @@ if __name__ == '__main__':
                 loc_ab = np.median(sorted([float(n)/r for r,n in rat_nreads])[ql:qr])
             abund_str[key] = loc_ab
             cover_str[key] = loc_cov
+            strain_statistical_len[key] = int(rat)
+            strain_statistical_reads[key] = int(strain_reads[key])
         for key,value in abund_str.items():
 	    if key=="GCA_000774955.1" or key=="GCA_000774945.1" or key=="GCA_000774975.1" or key=="GCA_000770565.1" or key=="GCA_000827875.1" or key=="GCA_000757255.1" or key=="GCA_000763555.1" or key=="GCA_001563765.1" or key=="GCA_001461825.1" or key=="GCA_001461835.1" or key=="GCA_001461845.1" or key=="GCA_001521815.1" :
                 continue
             abund_sp[species[key]] = abund_sp[species[key]]+value if species[key] in abund_sp else value
         for key,value in cover_str.items():
-            cover_sp_temp[species[key]].add(value)
+            cover_sp_temp[species[key]].append(value)
+            sp_statistical_len[species[key]].append(strain_statistical_len[key])
+            sp_statistical_reads[species[key]].append(strain_statistical_reads[key])
+            sp_statistical_reads_single[species[key]].append(strain_reads_single[key])
         for key,value in cover_sp_temp.items():
             cover_sp[key] = float(sum(value))/len(value)
 
@@ -234,7 +251,7 @@ if __name__ == '__main__':
         for key,value in abund_sp:
             if value!=0:
                 outfq.write("%s\t%s\n"%(key,value/total_abundance))
-                outfqcoverage.write("%s\t%s\n"%(key,cover_sp[key]))
+                outfqcoverage.write("%s\t%s\t%s\t%s\t%s\n"%(key,";".join([str(sing) for sing in sp_statistical_reads_single[key]]) ,";".join([str(rea) for rea in sp_statistical_reads[key]]),';'.join([str(vs) for vs in sp_statistical_len[key]]),cover_sp[key]))
             else:
                 logfq.write("%s\t%s\tabundance is zero\n"%(key,value))
         #for key,value in cover_sp.items():
