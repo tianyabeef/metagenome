@@ -119,16 +119,19 @@ if __name__ == '__main__':
         gi_bases = defaultdict(set)
         abund_str = {}
         cover_str = {}#converages of strain
+        cover_g_str = {}#coverages breadth  of strain
         strain_statistical_len ={} #statistical len of strain
         strain_statistical_reads = {} #statistical the num of reads in strain
         abund_sp = {}
         cover_sp_temp = defaultdict(list)
+        cover_g_sp_temp = defaultdict(list)
         sp_statistical_len =defaultdict(list)
         sp_statistical_reads = defaultdict(list)
         sp_statistical_reads_single = defaultdict(list)
         strain_reads = {}
         strain_reads_single ={}
         cover_sp = {} # converages of species
+        cover_g_sp ={} #coverages breadth  of species
         for line in infq:
             if line.startswith(","):
                 headline = line.strip().split(",")
@@ -196,20 +199,22 @@ if __name__ == '__main__':
                 le = float(gi_len[gi])
                 co = float(gi_counter[gi])
                 coverage = len(gi_bases[gi])
-                rat_nreads.append((le,co,coverage))
+                coverage_g = max(gi_bases[gi])-min(gi_bases[gi])+1
+                rat_nreads.append((le,co,coverage,coverage_g))
             for gi in strain_gi[key]:
                 if gi not in value:
                     le = float(gi_len[gi])
-                    rat_nreads.append((le,0,0))
+                    rat_nreads.append((le,0,0,0))
             rat_nreads = sorted(rat_nreads, key = lambda x: x[1])
-            rat_v,nreads_v,coverage_v = zip(*rat_nreads) if rat_nreads else sys.stderr.write("rat_nreads statical err")
+            rat_v,nreads_v,coverage_v,coverage_g_v = zip(*rat_nreads) if rat_nreads else sys.stderr.write("rat_nreads statical err")
             try:
-                rat, nrawreads,coverages= float(sum(rat_v)),float(sum(nreads_v)),float(sum(coverage_v))
+                rat, nrawreads,coverages,coverages_g= float(sum(rat_v)),float(sum(nreads_v)),float(sum(coverage_v)),float(sum(coverage_g_v))
             except TypeError:
                 print(rat_nreads)
             if stat == 'avg_g' or (not qn and stat in ['wavg_g','tavg_g']):
                 loc_ab = nrawreads / rat if rat >= 0 else 0.0
                 loc_cov = coverages/ rat if rat >= 0 else 0.0
+                loc_cov_g = coverages_g/ rat if rat >= 0 else 0.0
             elif stat == 'avg_l' or (not qn and stat in ['wavg_l','tavg_l']):
                 loc_ab = np.mean([float(n)/r for r,n in rat_nreads])
             # elif stat == 'tavg_g':
@@ -231,6 +236,7 @@ if __name__ == '__main__':
                 loc_ab = np.median(sorted([float(n)/r for r,n in rat_nreads])[ql:qr])
             abund_str[key] = loc_ab
             cover_str[key] = loc_cov
+            cover_g_str[key] = loc_cov_g
             strain_statistical_len[key] = int(rat)
             strain_statistical_reads[key] = int(strain_reads[key])
         for key,value in abund_str.items():
@@ -242,16 +248,19 @@ if __name__ == '__main__':
             sp_statistical_len[species[key]].append(strain_statistical_len[key])
             sp_statistical_reads[species[key]].append(strain_statistical_reads[key])
             sp_statistical_reads_single[species[key]].append(strain_reads_single[key])
+        for key,value in cover_g_str.items():
+            cover_g_sp_temp[species[key]].append(value)
         for key,value in cover_sp_temp.items():
             cover_sp[key] = float(sum(value))/len(value)
-
+        for key,value in cover_g_sp_temp.items():
+            cover_g_sp[key] = float(sum(value))/len(value)
         df = pd.DataFrame(abund_sp,index=["a"])
         total_abundance = float(df.sum(axis=1))
         abund_sp = sorted(abund_sp.items(),key = lambda d: d[1])
         for key,value in abund_sp:
             if value!=0:
                 outfq.write("%s\t%s\n"%(key,value/total_abundance))
-                outfqcoverage.write("%s\t%s\t%s\t%s\t%s\n"%(key,";".join([str(sing) for sing in sp_statistical_reads_single[key]]) ,";".join([str(rea) for rea in sp_statistical_reads[key]]),';'.join([str(vs) for vs in sp_statistical_len[key]]),cover_sp[key]))
+                outfqcoverage.write("%s\t%s\t%s\t%s\t%s\t%s\n"%(key,";".join([str(sing) for sing in sp_statistical_reads_single[key]]) ,";".join([str(rea) for rea in sp_statistical_reads[key]]),';'.join([str(vs) for vs in sp_statistical_len[key]]),cover_sp[key],cover_g_sp[key]))
             else:
                 logfq.write("%s\t%s\tabundance is zero\n"%(key,value))
         #for key,value in cover_sp.items():
